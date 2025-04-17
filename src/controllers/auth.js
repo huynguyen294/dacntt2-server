@@ -1,15 +1,15 @@
 import jwt from "jsonwebtoken";
 
 //[GET] /auth/new-access-token
-export const generateNewAccessToken = async (req, res) => {
-  const refreshToken = req.cookies.vocanote_rf_t;
+export const generateNewAccessToken = async (req, res, next) => {
+  const refreshToken = req.cookies.dacntt1_rf_t;
   console.log({ refreshToken });
 
   try {
     jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, decoded) => {
       if (err) {
         console.log({ err });
-        res.clearCookie("vocanote_rf_t");
+        res.clearCookie("dacntt1_rf_t");
         return res.status(401).json({ message: "Phiên đăng nhập hết hạn" });
       }
 
@@ -24,13 +24,10 @@ export const generateNewAccessToken = async (req, res) => {
 };
 
 //[GET] /auth/sign-out
-export const signOut = async (req, res) => {};
+export const signOut = async (req, res, next) => {};
 
 //[POST] /auth/sign-in
-export const signIn = async (req, res) => {};
-
-//[POST] /auth/sign-up
-export const signUp = async (req, res) => {};
+export const signIn = async (req, res, next) => {};
 
 //[POST] /auth/google-sign-in
-export const googleSignIn = async (req, res) => {};
+export const googleSignIn = async (req, res, next) => {};
