@@ -10,7 +10,7 @@ export const defaultUser = {
   date_of_birth: null,
   phone_number: null,
   address: null,
-  imageUrl: null,
+  image_url: null,
   create_at: null,
 };
 

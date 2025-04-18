@@ -5,7 +5,7 @@ import cookieParser from "cookie-parser";
 import route from "./routes/index.js";
 import dotenv from "dotenv";
 import createTables from "./models/createTables.js";
-import generateDummyUser from "./scripts/generateDummyUser.js";
+// import generateDummyUser from "./scripts/generateDummyUser.js";
 import { caseConverter, errorHandler, pagerAndOrder } from "./middlewares/index.js";
 
 dotenv.config({ type: "module" });
@@ -31,7 +31,7 @@ app.use(errorHandler);
 // create pg tables if not exits
 createTables();
 
-generateDummyUser();
+// generateDummyUser();
 
 app.listen(port, () => {
   console.log(`server running on port ${port}`);
