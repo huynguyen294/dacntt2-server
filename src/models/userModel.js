@@ -1,6 +1,7 @@
+import { ORDER, PAGER } from "../constants/index.js";
 import { generateCommonServices } from "./utils.js";
 
-const defaultUser = {
+export const defaultUser = {
   id: null,
   email: null,
   password: null,
@@ -8,6 +9,8 @@ const defaultUser = {
   role: null,
   date_of_birth: null,
   phone_number: null,
+  address: null,
+  imageUrl: null,
   create_at: null,
 };
 
@@ -21,7 +24,7 @@ const updateRole = async () => {};
 const userModel = {
   ...commonServices,
   // field suggestion for find funcs
-  find: async (filter = defaultUser) => commonServices.find(filter),
+  find: async (filter = defaultUser, pager = PAGER, order = ORDER) => commonServices.find(filter, pager, order),
   findOne: async (filter = defaultUser) => commonServices.findOne(filter),
   updateRole,
 };

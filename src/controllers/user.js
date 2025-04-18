@@ -4,8 +4,8 @@ import { userModel } from "../models/index.js";
 //[GET] /users
 export const getAllUsers = async (req, res, next) => {
   try {
-    const users = await userModel.find();
-    res.status(201).json({ users });
+    const { rows, pager } = await userModel.find({}, req.pager, req.order);
+    res.status(201).json({ users: rows, pager });
   } catch (error) {
     next(error);
   }

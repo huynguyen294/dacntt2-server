@@ -12,9 +12,10 @@ CREATE TABLE IF NOT EXISTS users (
     name VARCHAR(100) NOT NULL,
     password VARCHAR(255) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
-    role user_role DEFAULT 'student',
+    role user_role DEFAULT 'student' NOT NULL,
     date_of_birth DATE,
     phone_number VARCHAR(100),
     address TEXT,
-    create_at TIMESTAMP DEFAULT NOW()
+    image_url TEXT,
+    created_at TIMESTAMP DEFAULT NOW()
 )

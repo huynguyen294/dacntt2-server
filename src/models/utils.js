@@ -3,6 +3,28 @@ import pgDB from "../configs/db.js";
 export const generateCommonServices = (tableName) => {
   // check allowed tables
 
+  // generatePager
+  const generatePager = async (filter = {}, pager) => {
+    if (!pager) return [null, ""];
+    const { page, pageSize } = pager;
+
+    const query = `SELECT COUNT(*) FROM ${tableName}`;
+    const { filterStr, values } = generateFilterString(filter);
+    const finalQuery = query + filterStr;
+
+    console.log("count page:", finalQuery);
+    const result = await pgDB.query(finalQuery, values);
+    const total = Number(result.rows[0].count);
+    const pageCount = Math.ceil(total / pageSize);
+    const pagerGenerated = { total, pageCount, page, pageSize };
+    const pagerStr = ` LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
+
+    return [pagerGenerated, pagerStr];
+  };
+
+  // generate order
+  const generateOrderStr = ({ order, orderBy }) => ` ORDER BY ${orderBy} ${order} `;
+
   return {
     create: async (data) => {
       const fields = Object.keys(data);
@@ -40,17 +62,26 @@ export const generateCommonServices = (tableName) => {
       return result.rows[0];
     },
 
-    find: async (filter) => {
-      const query = `SELECT * FROM ${tableName}`;
-      const { filterStr, values } = generateFilterString(filter);
-      const finalQuery = query + filterStr;
+    find: async (filter = {}, pager, order) => {
+      const [pagerGenerated, pagerStr] = await generatePager(filter, pager);
+      const orderStr = generateOrderStr(order);
 
-      console.log("find:", finalQuery);
+      const query = `SELECT * FROM ${tableName}`;
+      const { filterStr, values } = generateFilterString(filter, pager);
+      const finalQuery = query + filterStr + orderStr + pagerStr;
+
+      if (pagerStr) {
+        values.push(pager.pageSize);
+        const offset = (pager.page - 1) * pager.pageSize;
+        values.push(offset);
+      }
+
+      console.log("find:", finalQuery, values);
       const result = await pgDB.query(finalQuery, values);
-      return result.rows;
+      return { rows: result.rows, pager: pagerGenerated };
     },
 
-    findOne: async (filter) => {
+    findOne: async (filter = {}) => {
       const query = `SELECT * FROM ${tableName}`;
       const { filterStr, values } = generateFilterString(filter);
       const finalQuery = query + filterStr + " LIMIT 1";
@@ -118,8 +149,8 @@ const MAP_OPERATORS = {
   ne: "<>",
   like: "LIKE",
   ilike: "ILIKE",
-  isNull: "IS NULL",
-  isNotNull: "IS NOT NULL",
+  // isNull: "IS NULL",
+  // isNotNull: "IS NOT NULL",
 };
 
 export const FILTER_OPS = Object.keys(MAP_OPERATORS).reduce((acc, k) => ({ ...acc, [k]: k }), {});
