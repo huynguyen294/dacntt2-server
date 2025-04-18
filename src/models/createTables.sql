@@ -15,5 +15,6 @@ CREATE TABLE IF NOT EXISTS users (
     role user_role DEFAULT 'student',
     date_of_birth DATE,
     phone_number VARCHAR(100),
+    address TEXT,
     create_at TIMESTAMP DEFAULT NOW()
 )

@@ -10,17 +10,18 @@ import {
   getAllUsers,
   getUserById,
 } from "../controllers/user.js";
+import { auth, role } from "../middlewares/index.js";
 
 const userRoute = express.Router();
 
-userRoute.get("/", getAllUsers);
 userRoute.put("/sign-up", signUp);
 userRoute.get("/check-email/:email", checkUserByEMail);
 userRoute.post("/compare-password", compareUserPassword);
 userRoute.get("/forgot-password/:email", forgotPassword);
 userRoute.patch("/reset-password/:email", resetPassword);
 userRoute.get("/verify-reset-password-code/:email/:code", verifyResetPasswordCode);
-userRoute.get("/:id", getUserById);
-userRoute.patch("/:id", updateUser);
+userRoute.get("/", auth, role(["admin"]), getAllUsers);
+userRoute.get("/:id", auth, getUserById);
+userRoute.patch("/:id", auth, updateUser);
 
 export default userRoute;
