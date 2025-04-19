@@ -11,15 +11,19 @@ export const getAllUsers = async (req, res, next) => {
   }
 };
 
-//[POST] /users/put
+//[POST] /users
 export const signUp = async (req, res, next) => {
   try {
     const data = req.body;
+    const { email } = data;
+    const oldUser = await userModel.findOne({ email });
+    if (oldUser) return res.status(400).json({ message: "Email này đã đăng ký." });
+
     const hashedPassword = await bcrypt.hash(data.password, 12);
     data.password = hashedPassword;
 
     await userModel.create(data);
-    res.status(201).json({ message: "Đăng ký thành công" });
+    res.status(201).json({ message: "Đăng ký thành công!" });
   } catch (error) {
     next(error);
   }

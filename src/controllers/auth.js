@@ -35,7 +35,7 @@ export const signIn = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await userModel.findOne({ email });
-    if (!user) return res.status(404).json({ message: "Người dùng không tồn tại." });
+    if (!user) return res.status(404).json({ message: "Email chưa đăng ký." });
 
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
     if (!isPasswordCorrect) return res.status(400).json({ message: "Mật khẩu không chính xác." });
