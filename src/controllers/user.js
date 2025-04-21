@@ -3,8 +3,18 @@ import { userModel } from "../models/index.js";
 
 //[GET] /users
 export const getAllUsers = async (req, res, next) => {
+  const { searchQuery } = req.query;
   try {
-    const { rows, pager } = await userModel.find({}, req.pager, req.order);
+    const filter = {};
+    if (searchQuery) {
+      filter.search = [
+        { phone_number: `%${searchQuery}%` },
+        { email: `%${searchQuery}%` },
+        { name: `%${searchQuery}%` },
+      ];
+    }
+
+    const [rows, pager] = await userModel.find(filter, req.pager, req.order);
     res.status(201).json({ users: rows, pager });
   } catch (error) {
     next(error);

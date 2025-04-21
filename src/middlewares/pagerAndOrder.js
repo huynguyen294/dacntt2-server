@@ -1,5 +1,6 @@
 import snakeCase from "lodash/snakeCase.js";
 import { ORDER, PAGER } from "../constants/index.js";
+import { convertToSnakeShallow } from "../utils/index.js";
 
 const getPager = (query) => {
   const { paging, page, pageSize } = query;
@@ -10,14 +11,15 @@ const getPager = (query) => {
 
 const pagerAndOrder = (req, res, next) => {
   // pager handle
-  req.pager = getPager(req.query);
+  req.pager = convertToSnakeShallow(getPager(req.query));
 
   // order handle
   req.order = ORDER;
 
   const { order, orderBy } = req.query;
   if (order) req.order.order = order;
-  if (orderBy) req.order.orderBy = snakeCase(orderBy);
+  if (orderBy) req.order.orderBy = orderBy;
+  req.order.orderBy = snakeCase(req.order.orderBy);
 
   next();
 };

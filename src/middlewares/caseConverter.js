@@ -2,8 +2,10 @@ import mapKeys from "lodash/mapKeys.js";
 import snakeCase from "lodash/snakeCase.js";
 import camelCase from "lodash/camelCase.js";
 
-function convertToSnakeShallow(obj) {
-  return mapKeys(obj, (_, key) => snakeCase(key));
+function convertToSnakeShallow(value) {
+  if (!value) return null;
+  if (Array.isArray(value)) return value.map((v) => convertToSnakeShallow(v));
+  return mapKeys(value, (_, key) => snakeCase(key));
 }
 
 function convertToCamel2Levels(obj) {

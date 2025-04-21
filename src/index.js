@@ -21,9 +21,8 @@ app.use(express.urlencoded({ limit: "30mb", extended: true }));
 app.use(cors({ origin: true, credentials: true }));
 // app.use(cors({ origin: "https://vocanote.vercel.app", credentials: true }));
 
+// handle pager and order
 app.use(pagerAndOrder);
-// convert all body to snaked_case and res.json to camel case
-app.use(caseConverter);
 // routes
 route(app);
 // error handling

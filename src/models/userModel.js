@@ -7,11 +7,11 @@ export const defaultUser = {
   password: null,
   name: null,
   role: null,
-  date_of_birth: null,
-  phone_number: null,
+  dateOfBirth: null,
+  phoneNumber: null,
   address: null,
-  image_url: null,
-  create_at: null,
+  imageUrl: null,
+  createdAt: null,
 };
 
 // commonServices
