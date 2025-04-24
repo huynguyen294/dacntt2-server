@@ -9,6 +9,7 @@ import {
   signUp,
   getAllUsers,
   getUserById,
+  createUser,
 } from "../controllers/user.js";
 import { auth, role } from "../middlewares/index.js";
 
@@ -20,6 +21,7 @@ userRoute.post("/compare-password", compareUserPassword);
 userRoute.get("/forgot-password/:email", forgotPassword);
 userRoute.patch("/reset-password/:email", resetPassword);
 userRoute.get("/verify-reset-password-code/:email/:code", verifyResetPasswordCode);
+userRoute.post("/", auth, createUser);
 userRoute.get("/:id", auth, getUserById);
 userRoute.patch("/:id", auth, updateUser);
 userRoute.get("/", auth, role(["admin"]), getAllUsers);

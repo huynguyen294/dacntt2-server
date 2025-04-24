@@ -26,6 +26,7 @@ const userModel = {
   // field suggestion for find funcs
   find: async (filter = defaultUser, pager = PAGER, order = ORDER) => commonServices.find(filter, pager, order),
   findOne: async (filter = defaultUser) => commonServices.findOne(filter),
+  exists: async (filter = defaultUser) => commonServices.exists(filter),
   updateRole,
 };
 

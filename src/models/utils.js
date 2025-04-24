@@ -31,7 +31,7 @@ export const generateCommonServices = (tableName) => {
       const valuesStr = fields.map((f, index) => "$" + (index + 1));
 
       const query = `INSERT INTO ${tableName} (${fieldsStr}) VALUES (${valuesStr}) RETURNING *`;
-      const values = fields.map((f) => data[f]);
+      const values = fields.map((f) => data[f] || null);
       console.log("create:", query);
 
       const result = await pgDB.query(query, values);
@@ -42,7 +42,7 @@ export const generateCommonServices = (tableName) => {
       const fields = Object.keys(newData);
 
       const valuesStr = fields.map((f, index) => `${f} = $${index + 1}`).join(", ");
-      const values = fields.map((f) => newData[f]);
+      const values = fields.map((f) => newData[f] || null);
       values.push(id);
 
       const query = `UPDATE ${tableName} SET ${valuesStr} WHERE id = $${values.length} RETURNING *`;
@@ -90,14 +90,25 @@ export const generateCommonServices = (tableName) => {
       return result.rows[0] ?? null;
     }),
 
-    findById: async (id) => {
+    exists: keyConvertWrapper(async (filter) => {
+      const query = `SELECT 1 FROM ${tableName}`;
+      const { filterStr, values } = generateFilterString(filter);
+      let finalQuery = query + filterStr;
+
+      finalQuery = `SELECT 1 WHERE EXISTS (${finalQuery})`;
+      console.log("findOne:", finalQuery);
+      const result = await pgDB.query(finalQuery, values);
+      return Boolean(result.rows[0]);
+    }),
+
+    findById: keyConvertWrapper(async (id) => {
       const query = `SELECT * FROM ${tableName} WHERE id = $1`;
       const values = [id];
       console.log("findById:", query);
 
       const result = await pgDB.query(query, values);
       return result.rows[0] ?? null;
-    },
+    }),
   };
 };
 
