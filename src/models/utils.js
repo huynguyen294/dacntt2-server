@@ -186,6 +186,7 @@ const generateFilterString = (filter) => {
 };
 
 const MAP_OPERATORS = {
+  eq: "=",
   gt: ">",
   gte: ">=",
   lt: "<",

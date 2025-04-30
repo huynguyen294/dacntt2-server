@@ -10,8 +10,9 @@ import {
   getAllUsers,
   getUserById,
   createUser,
+  deleteUserById,
 } from "../controllers/user.js";
-import { auth, role } from "../middlewares/index.js";
+import { auth, roles } from "../middlewares/index.js";
 
 const userRoute = express.Router();
 
@@ -24,6 +25,7 @@ userRoute.get("/verify-reset-password-code/:email/:code", verifyResetPasswordCod
 userRoute.post("/", auth, createUser);
 userRoute.get("/:id", auth, getUserById);
 userRoute.patch("/:id", auth, updateUser);
-userRoute.get("/", auth, role(["admin"]), getAllUsers);
+userRoute.delete("/:id", auth, deleteUserById);
+userRoute.get("/", auth, roles(["admin"]), getAllUsers);
 
 export default userRoute;

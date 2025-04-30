@@ -26,6 +26,8 @@ CREATE TABLE IF NOT EXISTS users (
     gender VARCHAR(50),
     address TEXT,
     image_url TEXT,
+    last_updated_at TIMESTAMP DEFAULT NOW(),
+    last_updated_by TIMESTAMP DEFAULT NOW(),
     created_at TIMESTAMP DEFAULT NOW()
 );
 -- user indexes;
@@ -48,7 +50,7 @@ CREATE INDEX IF NOT EXISTS idx_certificates_name_trgm ON certificates USING GIN 
 CREATE TABLE IF NOT EXISTS courses (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    level VARCHAR(255) NOT NULL,
+    level VARCHAR(255),
     number_of_lessons INT,
     status VARCHAR(255),
     created_at TIMESTAMP DEFAULT NOW()

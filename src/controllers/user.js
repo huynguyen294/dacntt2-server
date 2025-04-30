@@ -1,20 +1,13 @@
 import bcrypt from "bcryptjs";
 import { userModel } from "../models/index.js";
+import { transformQueryToFilterObject } from "../utils/index.js";
 
 //[GET] /users
 export const getAllUsers = async (req, res, next) => {
-  const { searchQuery, filter } = req.query;
   try {
-    const filter = {};
-    if (searchQuery) {
-      filter.search = [
-        { phone_number: `%${searchQuery}%` },
-        { email: `%${searchQuery}%` },
-        { name: `%${searchQuery}%` },
-      ];
-    }
+    const filterObj = transformQueryToFilterObject(req.query);
 
-    const [rows, pager] = await userModel.find(filter, req.pager, req.order);
+    const [rows, pager] = await userModel.find(filterObj, req.pager, req.order);
     res.status(201).json({ users: rows, pager });
   } catch (error) {
     next(error);
@@ -66,6 +59,17 @@ export const getUserById = async (req, res, next) => {
   try {
     const user = await userModel.findById(id);
     res.status(201).json({ user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+//[DELETE] /users/:id
+export const deleteUserById = async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    await userModel.delete(id);
+    res.status(201).json({ message: "Xóa thành công!" });
   } catch (error) {
     next(error);
   }

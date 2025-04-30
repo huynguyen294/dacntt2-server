@@ -6,7 +6,7 @@ import route from "./routes/index.js";
 import dotenv from "dotenv";
 import createTables from "./models/createTables.js";
 // import generateDummyUser from "./scripts/generateDummyUser.js";
-import { caseConverter, errorHandler, pagerAndOrder } from "./middlewares/index.js";
+import { errorHandler, pagerAndOrder } from "./middlewares/index.js";
 
 dotenv.config({ type: "module" });
 

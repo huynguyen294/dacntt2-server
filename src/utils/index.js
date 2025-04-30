@@ -15,3 +15,29 @@ export const convertToCamelShallow = (value) => {
   if (Array.isArray(value)) return value.map((v) => convertToCamelShallow(v));
   return mapKeys(value, (_, key) => camelCase(key));
 };
+
+export const transformQueryToFilterObject = (query, searchFields = ["phone_number", "email", "name"]) => {
+  const { searchQuery, filter } = query;
+
+  const filterObj = {};
+  if (searchQuery) {
+    filterObj.search = searchFields.map((f) => ({ [f]: `%${searchQuery}%` }));
+  }
+
+  if (filter) {
+    let listFilter = typeof filter === "string" ? [filter] : filter;
+    listFilter.forEach((item) => {
+      const [field, operator, value] = item.split(":");
+      switch (operator) {
+        case "in":
+          filterObj[field] = value.split(",");
+          break;
+        default:
+          filterObj[field] = { [operator]: value };
+          break;
+      }
+    });
+  }
+
+  return filterObj;
+};
