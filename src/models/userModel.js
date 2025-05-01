@@ -11,23 +11,30 @@ export const defaultUser = {
   phoneNumber: null,
   address: null,
   imageUrl: null,
+  lastUpdatedAt: null,
   createdAt: null,
+  lastUpdatedBy: null,
+  createdBy: null,
 };
 
 // commonServices
 const commonServices = generateCommonServices("users");
 
 // other services
-const updateRole = async () => {};
 
 // model
 const userModel = {
   ...commonServices,
   // field suggestion for find funcs
-  find: async (filter = defaultUser, pager = PAGER, order = ORDER) => commonServices.find(filter, pager, order),
-  findOne: async (filter = defaultUser) => commonServices.findOne(filter),
-  exists: async (filter = defaultUser) => commonServices.exists(filter),
-  updateRole,
+  find: async (filter = defaultUser, pager = PAGER, order = ORDER, fields = []) => {
+    return commonServices.find(filter, pager, order, fields);
+  },
+  findOne: async (filter = defaultUser, fields = []) => {
+    return commonServices.findOne(filter, fields);
+  },
+  exists: async (filter = defaultEmployee) => {
+    return commonServices.exists(filter);
+  },
 };
 
 export default userModel;

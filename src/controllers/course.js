@@ -1,4 +1,4 @@
-import courseModel from "../models/courseModel.js";
+import { courseModel } from "../models/index.js";
 import { transformQueryToFilterObject } from "../utils/index.js";
 
 //[GET] /courses
@@ -6,7 +6,7 @@ export const getCourses = async (req, res, next) => {
   try {
     const filterObj = transformQueryToFilterObject(req.query);
 
-    const [rows, pager] = await courseModel.find(filterObj, req.pager, req.order);
+    const [rows, pager] = await courseModel.find(filterObj, { pager: req.pager, order: req.order });
     res.status(201).json({ courses: rows, pager });
   } catch (error) {
     next(error);
@@ -16,7 +16,9 @@ export const getCourses = async (req, res, next) => {
 //[POST] /courses
 export const createCourse = async (req, res, next) => {
   try {
-    const newCourse = await courseModel.create(req.body);
+    const data = req.body;
+    data.created_by = req.userId;
+    const newCourse = await courseModel.create(data);
     res.status(201).json({ newCourse });
   } catch (error) {
     next(error);
@@ -40,6 +42,8 @@ export const getCourseById = async (req, res, next) => {
 export const updateCourse = async (req, res, next) => {
   const { id } = req.params;
   const newCourse = req.body;
+  newCourse.last_updated_at = new Date();
+  newCourse.last_updated_by = req.userId;
 
   try {
     const updatedCourse = await courseModel.updateById(id, newCourse);

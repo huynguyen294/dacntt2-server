@@ -1,5 +1,6 @@
 -- extension define;
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
+-- ;
 -- create user_role enum if not exits;
 DO $$ BEGIN IF NOT EXISTS (
     SELECT 1
@@ -14,6 +15,7 @@ DO $$ BEGIN IF NOT EXISTS (
 );
 END IF;
 END $$;
+-- ;
 -- create table user if not exits;
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
@@ -23,18 +25,43 @@ CREATE TABLE IF NOT EXISTS users (
     role user_role DEFAULT 'student' NOT NULL,
     date_of_birth DATE,
     phone_number VARCHAR(100),
-    gender VARCHAR(50),
+    gender VARCHAR(100),
     address TEXT,
     image_url TEXT,
-    last_updated_at TIMESTAMP DEFAULT NOW(),
-    last_updated_by TIMESTAMP DEFAULT NOW(),
-    created_at TIMESTAMP DEFAULT NOW()
+    last_updated_at TIMESTAMPTZ DEFAULT NOW(),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    last_updated_by INT REFERENCES users(id) ON DELETE
+    SET NULL,
+        created_by INT REFERENCES users(id) ON DELETE
+    SET NULL
 );
+-- ;
 -- user indexes;
-CREATE INDEX IF NOT EXISTS index_role ON users (role);
+CREATE INDEX IF NOT EXISTS idx_role ON users (role);
 CREATE INDEX IF NOT EXISTS idx_users_name_trgm ON users USING GIN (name gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS idx_users_email_trgm ON users USING GIN (email gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS idx_users_phone_number_trgm ON users USING GIN (phone_number gin_trgm_ops);
+-- ;
+-- create table employee if not exits;
+CREATE TABLE IF NOT EXISTS employees (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    salary NUMERIC NOT NULL,
+    employment_type VARCHAR(100) NOT NULL,
+    major VARCHAR(255),
+    certificates VARCHAR(255),
+    startDate DATE DEFAULT NOW(),
+    status VARCHAR(255),
+    note TEXT,
+    last_updated_at TIMESTAMPTZ DEFAULT NOW(),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    last_updated_by INT REFERENCES users(id) ON DELETE
+    SET NULL,
+        created_by INT REFERENCES users(id) ON DELETE
+    SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_employees_user_id ON employees (user_id);
+-- ;
 -- create table certificates if not exits;
 CREATE TABLE IF NOT EXISTS certificates (
     id SERIAL PRIMARY KEY,
@@ -42,20 +69,31 @@ CREATE TABLE IF NOT EXISTS certificates (
     issuing_agency VARCHAR(255) NOT NULL,
     image_url TEXT,
     status VARCHAR(255),
-    last_updated_at TIMESTAMP DEFAULT NOW(),
-    created_at TIMESTAMP DEFAULT NOW()
+    last_updated_at TIMESTAMPTZ DEFAULT NOW(),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    last_updated_by INT REFERENCES users(id) ON DELETE
+    SET NULL,
+        created_by INT REFERENCES users(id) ON DELETE
+    SET NULL
 );
 CREATE INDEX IF NOT EXISTS idx_certificates_name_trgm ON certificates USING GIN (name gin_trgm_ops);
+-- ;
 -- create table courses if not exits;
 CREATE TABLE IF NOT EXISTS courses (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     level VARCHAR(255),
-    number_of_lessons INT,
-    status VARCHAR(255),
-    created_at TIMESTAMP DEFAULT NOW()
+    number_of_lessons INT NOT NULL,
+    status VARCHAR(255) NOT NULL,
+    last_updated_at TIMESTAMPTZ DEFAULT NOW(),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    last_updated_by INT REFERENCES users(id) ON DELETE
+    SET NULL,
+        created_by INT REFERENCES users(id) ON DELETE
+    SET NULL
 );
 CREATE INDEX IF NOT EXISTS idx_courses_name_trgm ON courses USING GIN (name gin_trgm_ops);
+-- ;
 -- create table student_consultation if not exits;
 CREATE TABLE IF NOT EXISTS student_consultation (
     id SERIAL PRIMARY KEY,
@@ -67,29 +105,62 @@ CREATE TABLE IF NOT EXISTS student_consultation (
     priority VARCHAR(255),
     source VARCHAR(255),
     note TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    last_updated_at TIMESTAMPTZ DEFAULT NOW(),
     expected_course_id INT REFERENCES courses(id) ON DELETE
     SET NULL,
         consultant_id INT REFERENCES users(id) ON DELETE
     SET NULL,
-        created_at TIMESTAMP DEFAULT NOW()
+        last_updated_by INT REFERENCES users(id) ON DELETE
+    SET NULL,
+        created_by INT REFERENCES users(id) ON DELETE
+    SET NULL
 );
+-- ;
 -- student_consultation indexes;
+CREATE INDEX IF NOT EXISTS idx_student_consultation_expected_course_id ON student_consultation (expected_course_id);
+CREATE INDEX IF NOT EXISTS idx_student_consultation_consultant_id ON student_consultation (consultant_id);
 CREATE INDEX IF NOT EXISTS idx_student_consultation_name_trgm ON student_consultation USING GIN (name gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS idx_student_consultation_email_trgm ON student_consultation USING GIN (email gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS idx_student_consultation_phone_number_trgm ON student_consultation USING GIN (phone_number gin_trgm_ops);
+-- ;
 -- create table rooms if not exits;
 CREATE TABLE IF NOT EXISTS rooms (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    max_students INT,
-    status VARCHAR(255),
-    created_at TIMESTAMP DEFAULT NOW()
+    max_students INT NOT NULL,
+    status VARCHAR(255) NOT NULL,
+    last_updated_at TIMESTAMPTZ DEFAULT NOW(),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    last_updated_by INT REFERENCES users(id) ON DELETE
+    SET NULL,
+        created_by INT REFERENCES users(id) ON DELETE
+    SET NULL
 );
 CREATE INDEX IF NOT EXISTS idx_rooms_name_trgm ON rooms USING GIN (name gin_trgm_ops);
+-- ;
+-- create table rooms if not exits;
+CREATE TABLE IF NOT EXISTS enrollments (
+    id SERIAL PRIMARY KEY,
+    last_updated_at TIMESTAMPTZ DEFAULT NOW(),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    student_id INT REFERENCES users(id) ON DELETE
+    SET NULL,
+        class_id INT REFERENCES classes(id) ON DELETE
+    SET NULL,
+        last_updated_by INT REFERENCES users(id) ON DELETE
+    SET NULL,
+        created_by INT REFERENCES users(id) ON DELETE
+    SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_enrollments_class_id ON enrollments (class_id);
+CREATE INDEX IF NOT EXISTS idx_enrollments_student_id ON enrollments (student_id);
+-- ;
 -- create table classes if not exits;
 CREATE TABLE IF NOT EXISTS classes (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
+    cost NUMERIC NOT NULL,
     week_days VARCHAR(100) NOT NULL,
     shifts VARCHAR(100) NOT NULL,
     opening_day VARCHAR(100) NOT NULL,
@@ -97,11 +168,19 @@ CREATE TABLE IF NOT EXISTS classes (
     number_of_lessons INT NOT NULL,
     number_of_students INT NOT NULL,
     status VARCHAR(255),
-    room INT REFERENCES rooms(id) ON DELETE
-    SET NULL,
-        teacher_id INT REFERENCES users(id) ON DELETE
+    last_updated_at TIMESTAMPTZ DEFAULT NOW(),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    room_id INT REFERENCES rooms(id) ON DELETE
     SET NULL,
         course_id INT REFERENCES courses(id) ON DELETE
     SET NULL,
-        created_at TIMESTAMP DEFAULT NOW()
+        teacher_id INT REFERENCES users(id) ON DELETE
+    SET NULL,
+        last_updated_by INT REFERENCES users(id) ON DELETE
+    SET NULL,
+        created_by INT REFERENCES users(id) ON DELETE
+    SET NULL
 );
+CREATE INDEX IF NOT EXISTS idx_classes_room_id ON classes (room_id);
+CREATE INDEX IF NOT EXISTS idx_classes_course_id ON classes (course_id);
+CREATE INDEX IF NOT EXISTS idx_classes_teacher_id ON classes (teacher_id);

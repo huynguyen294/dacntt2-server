@@ -21,9 +21,6 @@ export const generateCommonServices = (tableName) => {
     return [pagerGenerated, pagerStr];
   };
 
-  // generate order
-  const generateOrderStr = ({ order, order_by }) => ` ORDER BY ${order_by} ${order} `;
-
   return {
     create: keyConvertWrapper(async (data) => {
       const fields = Object.keys(data);
@@ -45,6 +42,8 @@ export const generateCommonServices = (tableName) => {
       const values = fields.map((f) => newData[f] || null);
       values.push(id);
 
+      console.log(values);
+
       const query = `UPDATE ${tableName} SET ${valuesStr} WHERE id = $${values.length} RETURNING *`;
       console.log("updateById:", query);
 
@@ -61,11 +60,12 @@ export const generateCommonServices = (tableName) => {
       return result.rows[0];
     }),
 
-    find: keyConvertWrapper(async (filter = {}, pager, order) => {
+    find: keyConvertWrapper(async (filter = {}, pager, order, fields) => {
       const [pagerGenerated, pagerStr] = await generatePager(filter, pager);
       const orderStr = generateOrderStr(order);
+      const fieldsStr = generateFieldsStr(fields);
 
-      const query = `SELECT * FROM ${tableName}`;
+      const query = `SELECT ${fieldsStr} FROM ${tableName}`;
       const { filterStr, values } = generateFilterString(filter, pager);
       const finalQuery = query + filterStr + orderStr + pagerStr;
 
@@ -80,8 +80,9 @@ export const generateCommonServices = (tableName) => {
       return [result.rows, pagerGenerated];
     }),
 
-    findOne: keyConvertWrapper(async (filter = {}) => {
-      const query = `SELECT * FROM ${tableName}`;
+    findOne: keyConvertWrapper(async (filter = {}, fields) => {
+      const fieldsStr = generateFieldsStr(fields);
+      const query = `SELECT ${fieldsStr} FROM ${tableName}`;
       const { filterStr, values } = generateFilterString(filter);
       const finalQuery = query + filterStr + " LIMIT 1";
 
@@ -90,7 +91,17 @@ export const generateCommonServices = (tableName) => {
       return result.rows[0] ?? null;
     }),
 
-    exists: keyConvertWrapper(async (filter) => {
+    findManyById: keyConvertWrapper(async (listId, idField = "id", fields) => {
+      const fieldsStr = generateFieldsStr(fields);
+      const query = `SELECT ${fieldsStr} FROM ${tableName} WHERE ${idField} = ANY($1)`;
+      const values = [listId];
+
+      console.log("findOne:", query);
+      const result = await pgDB.query(query, values);
+      return result.rows;
+    }),
+
+    exists: keyConvertWrapper(async (filter = {}) => {
       const query = `SELECT 1 FROM ${tableName}`;
       const { filterStr, values } = generateFilterString(filter);
       let finalQuery = query + filterStr;
@@ -101,8 +112,9 @@ export const generateCommonServices = (tableName) => {
       return Boolean(result.rows[0]);
     }),
 
-    findById: keyConvertWrapper(async (id) => {
-      const query = `SELECT * FROM ${tableName} WHERE id = $1`;
+    findById: keyConvertWrapper(async (id, fields = []) => {
+      const fieldsStr = generateFieldsStr(fields);
+      const query = `SELECT ${fieldsStr} FROM ${tableName} WHERE id = $1`;
       const values = [id];
       console.log("findById:", query);
 
@@ -112,7 +124,18 @@ export const generateCommonServices = (tableName) => {
   };
 };
 
-const generateSearchString = (values, filterStr, searchValue) => {
+export const generateFieldsStr = (fields) => {
+  if (!fields?.length) return "*";
+  return fields.join(", ");
+};
+
+export const generateOrderStr = (orderObj) => {
+  if (!orderObj) return "";
+  const { order, order_by } = orderObj;
+  return ` ORDER BY ${order_by} ${order} `;
+};
+
+export const generateSearchString = (values, filterStr, searchValue) => {
   let currentFilterStr = filterStr;
 
   // search and case
@@ -135,7 +158,7 @@ const generateSearchString = (values, filterStr, searchValue) => {
   return currentFilterStr;
 };
 
-const generateFilterString = (filter) => {
+export const generateFilterString = (filter) => {
   const values = [];
   let filterStr = "";
 
