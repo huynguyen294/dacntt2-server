@@ -11,10 +11,6 @@ export const defaultEmployee = {
   note: null,
   startDate: null,
   status: null,
-  lastUpdatedAt: null,
-  createdAt: null,
-  lastUpdatedBy: null,
-  createdBy: null,
 };
 
 // commonServices

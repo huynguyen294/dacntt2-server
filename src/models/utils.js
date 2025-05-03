@@ -42,8 +42,6 @@ export const generateCommonServices = (tableName) => {
       const values = fields.map((f) => newData[f] || null);
       values.push(id);
 
-      console.log(values);
-
       const query = `UPDATE ${tableName} SET ${valuesStr} WHERE id = $${values.length} RETURNING *`;
       console.log("updateById:", query);
 
@@ -88,6 +86,7 @@ export const generateCommonServices = (tableName) => {
 
       console.log("findOne:", finalQuery);
       const result = await pgDB.query(finalQuery, values);
+      console.log(result.rows[0]);
       return result.rows[0] ?? null;
     }),
 
@@ -196,12 +195,16 @@ export const generateFilterString = (filter) => {
 
       if (typeof value === "object" && value !== null) {
         const [opKey] = Object.keys(value);
-        operator = MAP_OPERATORS[opKey] || "=";
+        operator = MAP_OPERATORS[opKey];
         value = value[opKey];
       }
 
       values.push(value);
-      filterStr += `${field} ${operator} $${values.length}`;
+      if (operator === "ANY") {
+        filterStr += `${field} = ${operator}($${values.length})`;
+      } else {
+        filterStr += `${field} ${operator} $${values.length}`;
+      }
     }
   });
 
@@ -217,6 +220,7 @@ const MAP_OPERATORS = {
   ne: "<>",
   like: "LIKE",
   ilike: "ILIKE",
+  any: "ANY",
   // isNull: "IS NULL",
   // isNotNull: "IS NOT NULL",
 };

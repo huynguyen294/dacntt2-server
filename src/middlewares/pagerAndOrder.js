@@ -14,7 +14,7 @@ const pagerAndOrder = (req, res, next) => {
   req.pager = convertToSnakeShallow(getPager(req.query));
 
   // order handle
-  req.order = ORDER;
+  req.order = { ...ORDER };
 
   const { order, orderBy } = req.query;
   if (order) req.order.order = order;

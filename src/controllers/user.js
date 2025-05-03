@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
-import { userModel } from "../models/index.js";
+import { employeeModel, userModel } from "../models/index.js";
 import { arrayToObject, transformQueryToFilterObject } from "../utils/index.js";
+import { EMPLOYEE_ROLES } from "../constants/index.js";
 
 const allowedUpdateUser = ["admin"];
 
@@ -30,18 +31,21 @@ export const getUsersWithRole = async (req, res, next) => {
 
   try {
     const filterObj = transformQueryToFilterObject(req.query);
-    filterObj.role = role;
+    if (role !== "_") filterObj.role = role;
+
     const [rows, pager] = await userModel.find(filterObj, req.pager, req.order);
 
     const refs = {};
     const promises = [null, null, null];
-    const userIds = rows.reduce((row) => [row.createdBy, row.lastUpdatedBy]).filter(Boolean);
+    const userIds = rows.map((row) => [row.createdBy, row.lastUpdatedBy]).filter(Boolean);
     if (userIds.length > 0) {
       promises[0] = userModel.findManyById(userIds);
     }
 
-    if (["teacher", "consultant", "finance-officer"].includes(role)) {
+    if (EMPLOYEE_ROLES.includes(role)) {
       // promises[1] = find employment by userId;
+      const userIds = rows.map((u) => u.id);
+      promises[1] = employeeModel.find({ userId: { any: userIds } });
     }
 
     if (role === "teacher") {
@@ -52,6 +56,12 @@ export const getUsersWithRole = async (req, res, next) => {
     if (role === "student") {
       // get class
       // promises[2] = find class by userIds student_id;
+    }
+
+    const [creators, employeeResult] = await Promise.all(promises);
+    refs.creators = arrayToObject(creators, "id");
+    if (employeeResult) {
+      refs.userEmployees = arrayToObject(employeeResult[0], "userId");
     }
 
     res.status(201).json({ users: rows, pager, refs });
@@ -82,17 +92,17 @@ export const signUp = async (req, res, next) => {
 //[POST] /users/
 export const createUser = async (req, res, next) => {
   try {
-    const { role, ...data } = req.body;
-    const { email } = data;
+    const { role, employmentType, certificates, major, startDate, salary, status, note, ...userData } = req.body;
+    const { email } = userData;
     const oldUser = await userModel.findOne({ email });
     if (oldUser) return res.status(400).json({ message: "Email này đã đăng ký." });
 
-    const hashedPassword = await bcrypt.hash(data.password, 12);
-    data.password = hashedPassword;
-    data.created_by = req.userId;
+    const hashedPassword = await bcrypt.hash(userData.password, 12);
+    userData.password = hashedPassword;
+    userData.created_by = req.userId;
 
-    if (allowedUpdateUser.includes(req.userRole)) data.role = role;
-    await userModel.create(data);
+    if (allowedUpdateUser.includes(req.userRole)) userData.role = role;
+    await userModel.create(userData);
     res.status(201).json({ message: "Đăng ký thành công!" });
   } catch (error) {
     next(error);
@@ -101,21 +111,31 @@ export const createUser = async (req, res, next) => {
 
 //[POST] /users/:role
 export const createUserWithRole = async (req, res, next) => {
-  const { role } = req.params;
+  const { role: paramRole } = req.params;
 
   try {
-    const { role, ...data } = req.body;
-    const { email } = data;
+    const { role, employmentType, certificates, major, startDate, salary, status, note, ...userData } = req.body;
+    const employeeData = { employmentType, certificates, major, startDate, salary, status, note };
+
+    const { email } = userData;
     const oldUser = await userModel.findOne({ email });
     if (oldUser) return res.status(400).json({ message: "Email này đã đăng ký." });
 
-    const hashedPassword = await bcrypt.hash(data.password, 12);
-    data.password = hashedPassword;
-    data.created_by = req.userId;
+    const hashedPassword = await bcrypt.hash(userData.password, 12);
+    userData.password = hashedPassword;
+    userData.created_by = req.userId;
 
-    if (allowedUpdateUser.includes(req.userRole)) data.role = role;
-    await userModel.create(data);
-    res.status(201).json({ message: "Đăng ký thành công!" });
+    if (allowedUpdateUser.includes(req.userRole)) userData.role = role;
+
+    const refs = {};
+    const newUser = await userModel.create(userData);
+    if (EMPLOYEE_ROLES.includes(paramRole)) {
+      employeeData.userId = newUser.id;
+      const newEmployee = await employeeModel.create(employeeData);
+      refs.userEmployees = { [newUser.id]: newEmployee };
+    }
+
+    res.status(201).json({ newUser, refs, message: "Tạo user thành công!" });
   } catch (error) {
     next(error);
   }
@@ -132,12 +152,19 @@ export const getUserById = async (req, res, next) => {
   }
 };
 
-//[GET] /users/:id
+//[GET] /users/:role/:id
 export const getUserByIdWithRole = async (req, res, next) => {
-  const { id } = req.params;
+  const { role, id } = req.params;
   try {
-    const user = await userModel.findById(id);
-    res.status(201).json({ user });
+    const { password, ...user } = await userModel.findById(id);
+
+    const refs = {};
+    if (EMPLOYEE_ROLES.includes(role)) {
+      const employee = await employeeModel.findOne({ userId: id });
+      refs.userEmployees = { [id]: employee };
+    }
+
+    res.status(201).json({ user, refs });
   } catch (error) {
     next(error);
   }
@@ -149,6 +176,59 @@ export const deleteUserById = async (req, res, next) => {
   try {
     await userModel.delete(id);
     res.status(201).json({ message: "Xóa thành công!" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+//[PATCH] /users/:role/:id
+export const updateUserWithRole = async (req, res, next) => {
+  const { role: paramRole, id } = req.params;
+  try {
+    if (!allowedUpdateUser.includes(req.userRole) && req.userId != id) {
+      res.status(403).json({ message: "Quyền truy cập bị từ chối" });
+      return;
+    }
+
+    // remove password, role, oid
+    const {
+      password,
+      id: oid,
+      employeeId,
+      role,
+      employmentType,
+      certificates,
+      major,
+      startDate,
+      salary,
+      status,
+      note,
+      ...userData
+    } = req.body;
+    const employeeData = { employmentType, certificates, major, startDate, salary, status, note };
+
+    if (allowedUpdateUser.includes(req.userRole)) {
+      userData.role = role;
+      if (password) userData.password = await bcrypt.hash(userData.password, 12);
+    }
+
+    userData.last_updated_at = new Date();
+    userData.last_updated_by = req.userId;
+    const updatedUser = await userModel.updateById(id, userData);
+
+    const refs = {};
+    if (EMPLOYEE_ROLES.includes(paramRole)) {
+      if (employeeId) {
+        const result = await employeeModel.updateById(employeeId, employeeData);
+        refs.userEmployees = { [id]: result };
+      } else {
+        employeeData.userId = id;
+        const result = await employeeModel.create(employeeData);
+        refs.userEmployees = { [id]: result };
+      }
+    }
+
+    res.status(201).json({ updatedUser, refs });
   } catch (error) {
     next(error);
   }

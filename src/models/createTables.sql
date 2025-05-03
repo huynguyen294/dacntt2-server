@@ -28,8 +28,8 @@ CREATE TABLE IF NOT EXISTS users (
     gender VARCHAR(100),
     address TEXT,
     image_url TEXT,
-    last_updated_at TIMESTAMPTZ DEFAULT NOW(),
     created_at TIMESTAMPTZ DEFAULT NOW(),
+    last_updated_at TIMESTAMPTZ DEFAULT NOW(),
     last_updated_by INT REFERENCES users(id) ON DELETE
     SET NULL,
         created_by INT REFERENCES users(id) ON DELETE
@@ -46,19 +46,14 @@ CREATE INDEX IF NOT EXISTS idx_users_phone_number_trgm ON users USING GIN (phone
 CREATE TABLE IF NOT EXISTS employees (
     id SERIAL PRIMARY KEY,
     user_id INT REFERENCES users(id) ON DELETE CASCADE,
-    salary NUMERIC NOT NULL,
+    salary INT NOT NULL,
     employment_type VARCHAR(100) NOT NULL,
-    major VARCHAR(255),
+    major VARCHAR(255) NOT NULL,
     certificates VARCHAR(255),
-    startDate DATE DEFAULT NOW(),
-    status VARCHAR(255),
-    note TEXT,
-    last_updated_at TIMESTAMPTZ DEFAULT NOW(),
+    start_date DATE,
+    status VARCHAR(255) NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    last_updated_by INT REFERENCES users(id) ON DELETE
-    SET NULL,
-        created_by INT REFERENCES users(id) ON DELETE
-    SET NULL
+    note TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_employees_user_id ON employees (user_id);
 -- ;

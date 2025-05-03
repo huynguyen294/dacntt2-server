@@ -43,6 +43,5 @@ export const transformQueryToFilterObject = (query, searchFields = ["phone_numbe
 };
 
 export const arrayToObject = (arr = [], property = "id") => {
-  console.log(arr.reduce((acc, curr) => ({ ...acc, [curr[property]]: curr }), {}));
   return arr.reduce((acc, curr) => ({ ...acc, [curr[property]]: curr }), {});
 };
