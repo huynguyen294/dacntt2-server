@@ -31,40 +31,29 @@ export const getUsersWithRole = async (req, res, next) => {
 
   try {
     const filterObj = transformQueryToFilterObject(req.query);
-    if (role !== "_") filterObj.role = role;
+    if (role === "_") {
+      const [rows, pager] = await userModel.find(filterObj, req.pager, req.order);
+      return res.status(201).json({ users: rows, pager });
+    }
 
-    const [rows, pager] = await userModel.find(filterObj, req.pager, req.order);
+    filterObj.role = role;
+    if (["consultant", "finance-officer"].includes(role)) {
+      const [rows, pager] = await userModel.findEmployee(filterObj, req.pager, req.order);
+      return res.status(201).json({ users: rows, pager });
+    }
 
     const refs = {};
-    const promises = [null, null, null];
-    const userIds = rows.map((row) => [row.createdBy, row.lastUpdatedBy]).filter(Boolean);
-    if (userIds.length > 0) {
-      promises[0] = userModel.findManyById(userIds);
-    }
-
-    if (EMPLOYEE_ROLES.includes(role)) {
-      // promises[1] = find employment by userId;
-      const userIds = rows.map((u) => u.id);
-      promises[1] = employeeModel.find({ userId: { any: userIds } });
-    }
-
     if (role === "teacher") {
+      const [rows, pager] = await userModel.findEmployee(filterObj, req.pager, req.order);
       // get class
-      // promises[2] = find class by userIds = teacher_id;
+      return res.status(201).json({ users: rows, pager, refs });
     }
 
     if (role === "student") {
+      const [rows, pager] = await userModel.find(filterObj, req.pager, req.order);
       // get class
-      // promises[2] = find class by userIds student_id;
+      return res.status(201).json({ users: rows, pager, refs });
     }
-
-    const [creators, employeeResult] = await Promise.all(promises);
-    refs.creators = arrayToObject(creators, "id");
-    if (employeeResult) {
-      refs.userEmployees = arrayToObject(employeeResult[0], "userId");
-    }
-
-    res.status(201).json({ users: rows, pager, refs });
   } catch (error) {
     next(error);
   }
@@ -84,6 +73,48 @@ export const signUp = async (req, res, next) => {
     if (allowedUpdateUser.includes(req.userRole)) data.role = role;
     await userModel.create(data);
     res.status(201).json({ message: "Đăng ký thành công!" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+//[GET] /users/:id
+export const getUserById = async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    const user = await userModel.findById(id);
+    res.status(201).json({ user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+//[GET] /users/:role/:id
+export const getUserByIdWithRole = async (req, res, next) => {
+  const { role, id } = req.params;
+  try {
+    if (role === "_") {
+      const user = await userModel.findById(id);
+      return res.status(201).json({ user });
+    }
+
+    if (EMPLOYEE_ROLES.includes(role)) {
+      const user = await userModel.findEmployeeById(id);
+      res.status(201).json({ user });
+    }
+
+    const refs = {};
+    if (role === "teacher") {
+      const user = await userModel.findEmployeeById(id);
+      // get class
+      res.status(201).json({ user });
+    }
+
+    if (role === "student") {
+      const user = await userModel.findById(id);
+      // get class
+      return res.status(201).json({ user, refs });
+    }
   } catch (error) {
     next(error);
   }
@@ -141,46 +172,6 @@ export const createUserWithRole = async (req, res, next) => {
   }
 };
 
-//[GET] /users/:id
-export const getUserById = async (req, res, next) => {
-  const { id } = req.params;
-  try {
-    const user = await userModel.findById(id);
-    res.status(201).json({ user });
-  } catch (error) {
-    next(error);
-  }
-};
-
-//[GET] /users/:role/:id
-export const getUserByIdWithRole = async (req, res, next) => {
-  const { role, id } = req.params;
-  try {
-    const { password, ...user } = await userModel.findById(id);
-
-    const refs = {};
-    if (EMPLOYEE_ROLES.includes(role)) {
-      const employee = await employeeModel.findOne({ userId: id });
-      refs.userEmployees = { [id]: employee };
-    }
-
-    res.status(201).json({ user, refs });
-  } catch (error) {
-    next(error);
-  }
-};
-
-//[DELETE] /users/:id
-export const deleteUserById = async (req, res, next) => {
-  const { id } = req.params;
-  try {
-    await userModel.delete(id);
-    res.status(201).json({ message: "Xóa thành công!" });
-  } catch (error) {
-    next(error);
-  }
-};
-
 //[PATCH] /users/:role/:id
 export const updateUserWithRole = async (req, res, next) => {
   const { role: paramRole, id } = req.params;
@@ -203,6 +194,7 @@ export const updateUserWithRole = async (req, res, next) => {
       salary,
       status,
       note,
+      userId,
       ...userData
     } = req.body;
     const employeeData = { employmentType, certificates, major, startDate, salary, status, note };
@@ -219,6 +211,7 @@ export const updateUserWithRole = async (req, res, next) => {
     const refs = {};
     if (EMPLOYEE_ROLES.includes(paramRole)) {
       if (employeeId) {
+        employeeData.userId = userId || id;
         const result = await employeeModel.updateById(employeeId, employeeData);
         refs.userEmployees = { [id]: result };
       } else {
@@ -255,6 +248,17 @@ export const updateUser = async (req, res, next) => {
     data.last_updated_by = req.userId;
     const updatedUser = await userModel.updateById(id, data);
     res.status(201).json({ updatedUser });
+  } catch (error) {
+    next(error);
+  }
+};
+
+//[DELETE] /users/:id
+export const deleteUserById = async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    await userModel.delete(id);
+    res.status(201).json({ message: "Xóa thành công!" });
   } catch (error) {
     next(error);
   }

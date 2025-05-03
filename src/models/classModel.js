@@ -3,12 +3,19 @@ import { generateCommonServices } from "./utils.js";
 
 export const defaultClass = {
   id: null,
-  email: null,
-  level: null,
+  name: null,
+  cost: null,
+  weekDays: null,
+  shifts: null,
+  openingDay: null,
+  closingDay: null,
   numberOfLessons: null,
+  numberOfStudents: null,
   status: null,
   lastUpdatedAt: null,
   createdAt: null,
+  courseId: null,
+  teacherId: null,
   lastUpdatedBy: null,
   createdBy: null,
 };
@@ -17,7 +24,7 @@ export const defaultClass = {
 const commonServices = generateCommonServices("classes");
 
 // other services
-const findByUserIds = async () => {};
+const findStudentClasses = async () => {};
 
 // model
 const classModel = {

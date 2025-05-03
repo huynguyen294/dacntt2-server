@@ -1,26 +1,8 @@
 import pgDB from "../configs/db.js";
+import { ORDER } from "../constants/index.js";
 import { convertToCamelShallow, convertToSnakeShallow } from "../utils/index.js";
 
 export const generateCommonServices = (tableName) => {
-  // generatePager
-  const generatePager = async (filter = {}, pager) => {
-    if (!pager) return [null, ""];
-    const { page, page_size } = pager;
-
-    const query = `SELECT COUNT(*) FROM ${tableName}`;
-    const { filterStr, values } = generateFilterString(filter);
-    const finalQuery = query + filterStr;
-
-    console.log("generatePager", finalQuery);
-    const result = await pgDB.query(finalQuery, values);
-    const total = Number(result.rows[0].count);
-    const page_count = Math.ceil(total / page_size);
-    const pagerGenerated = { total, page_count, page, page_size };
-    const pagerStr = ` LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
-
-    return [pagerGenerated, pagerStr];
-  };
-
   return {
     create: keyConvertWrapper(async (data) => {
       const fields = Object.keys(data);
@@ -123,15 +105,37 @@ export const generateCommonServices = (tableName) => {
   };
 };
 
-export const generateFieldsStr = (fields) => {
+export const generateFieldsStr = (fields, shortName) => {
   if (!fields?.length) return "*";
-  return fields.join(", ");
+  if (!shortName) return fields.join(", ");
+  return fields.map((f) => shortName + "." + f).join(", ");
 };
 
-export const generateOrderStr = (orderObj) => {
+export const generateOrderStr = (orderObj, shortName) => {
   if (!orderObj) return "";
+  if (shortName) orderObj.order_by = shortName + "." + orderObj.order_by;
   const { order, order_by } = orderObj;
-  return ` ORDER BY ${order_by} ${order} `;
+  const nullStr = (order || ORDER.order).toLowerCase() === "desc" ? "NULLS LAST" : "NULLS FIRST";
+
+  return ` ORDER BY ${order_by} ${order} ${nullStr}`;
+};
+
+export const generatePager = async (tableName, filter = {}, pager) => {
+  if (!pager) return [null, ""];
+  const { page, page_size } = pager;
+
+  const query = `SELECT COUNT(*) FROM ${tableName}`;
+  const { filterStr, values } = generateFilterString(filter);
+  const finalQuery = query + filterStr;
+
+  console.log("generatePager", finalQuery);
+  const result = await pgDB.query(finalQuery, values);
+  const total = Number(result.rows[0].count);
+  const page_count = Math.ceil(total / page_size);
+  const pagerGenerated = { total, page_count, page, page_size };
+  const pagerStr = ` LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
+
+  return [pagerGenerated, pagerStr];
 };
 
 export const generateSearchString = (values, filterStr, searchValue) => {
@@ -164,9 +168,22 @@ export const generateFilterString = (filter) => {
   if (Object.values(filter).filter(Boolean).length === 0) return { filterStr, values };
 
   filterStr = " WHERE ";
+
+  const generateCondition = (field, value, operator = "=") => {
+    if (typeof value === "object" && value !== null) {
+      const [opKey] = Object.keys(value);
+      operator = MAP_OPERATORS[opKey];
+      value = value[opKey];
+    }
+
+    values.push(value);
+    if (value === true) return `${field} ${operator}`;
+    if (operator === "ANY") return `${field} = ${operator}($${values.length})`;
+    return `${field} ${operator} $${values.length}`;
+  };
+
   Object.keys(filter).forEach((field) => {
     let value = filter[field];
-    let operator = "=";
 
     // handle search
     if (field === "search") {
@@ -180,31 +197,14 @@ export const generateFilterString = (filter) => {
       // Add AND if not the first condition
       if (values.length > 0) filterStr += " AND ";
 
-      const orConditions = value
-        .map((val, idx) => {
-          values.push(val);
-          return `${field} = $${values.length}`;
-        })
-        .join(" OR ");
+      const orConditions = value.map((val) => generateCondition(field, val)).join(" OR ");
       filterStr += `(${orConditions})`;
     }
     // Handle operator
     else {
       // Add AND if not the first condition
       if (values.length > 0) filterStr += " AND ";
-
-      if (typeof value === "object" && value !== null) {
-        const [opKey] = Object.keys(value);
-        operator = MAP_OPERATORS[opKey];
-        value = value[opKey];
-      }
-
-      values.push(value);
-      if (operator === "ANY") {
-        filterStr += `${field} = ${operator}($${values.length})`;
-      } else {
-        filterStr += `${field} ${operator} $${values.length}`;
-      }
+      filterStr += generateCondition(field, value);
     }
   });
 
@@ -221,6 +221,7 @@ const MAP_OPERATORS = {
   like: "LIKE",
   ilike: "ILIKE",
   any: "ANY",
+  isNull: "IS NULL",
   // isNull: "IS NULL",
   // isNotNull: "IS NOT NULL",
 };
@@ -234,3 +235,23 @@ export const keyConvertWrapper =
   };
 
 export const FILTER_OPS = Object.keys(MAP_OPERATORS).reduce((acc, k) => ({ ...acc, [k]: k }), {});
+
+export const filterPropertyByDefaultObject = (targetObject = {}, defaultObject = {}, extProps = []) =>
+  Object.keys(targetObject).reduce((acc, field) => {
+    if (extProps.includes(field) || defaultObject.hasOwnProperty(field)) acc[field] = targetObject[field];
+    return acc;
+  }, {});
+
+export const mergeFilterByShortName = (filters = {}) =>
+  Object.keys(filters).reduce((acc, shortName) => {
+    const object = filters[shortName];
+    Object.keys(object).forEach((property) => {
+      const pre = `${shortName}.`;
+      if (property.includes(pre)) {
+        acc[property] = object[property];
+      } else {
+        acc[[pre + property]] = object[property];
+      }
+    });
+    return acc;
+  }, {});
