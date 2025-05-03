@@ -1,7 +1,8 @@
-import bcrypt from "bcryptjs";
-import { employeeModel, userModel } from "../models/index.js";
+import { classModel, employeeModel, userModel } from "../models/index.js";
 import { arrayToObject, transformQueryToFilterObject } from "../utils/index.js";
 import { EMPLOYEE_ROLES } from "../constants/index.js";
+import groupBy from "lodash/groupBy.js";
+import bcrypt from "bcryptjs";
 
 const allowedUpdateUser = ["admin"];
 
@@ -45,7 +46,12 @@ export const getUsersWithRole = async (req, res, next) => {
     const refs = {};
     if (role === "teacher") {
       const [rows, pager] = await userModel.findEmployee(filterObj, req.pager, req.order);
-      // get class
+      // const userIds = rows.map((row) => row.id);
+      // if (userIds.length > 0) {
+      //   const [rows] = await classModel.find({ teacherId: { any: userIds } });
+      //   refs.teacherClasses = groupBy(rows, "teacherId");
+      // }
+
       return res.status(201).json({ users: rows, pager, refs });
     }
 

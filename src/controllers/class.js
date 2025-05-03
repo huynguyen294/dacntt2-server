@@ -6,7 +6,7 @@ export const getClasses = async (req, res, next) => {
   try {
     const filterObj = transformQueryToFilterObject(req.query);
 
-    const [rows, pager] = await classModel.find(filterObj, { pager: req.pager, order: req.order });
+    const [rows, pager] = await classModel.find(filterObj, req.pager, req.order);
     res.status(201).json({ classes: rows, pager });
   } catch (error) {
     next(error);

@@ -1,13 +1,19 @@
 import express from "express";
-import { createCourse, deleteCourse, getCourseById, getCourses, updateCourse } from "../controllers/course.js";
-import { auth, roles } from "../middlewares/index.js";
+import {
+  createEnrollment,
+  deleteEnrollment,
+  getEnrollmentById,
+  getEnrollments,
+  updateEnrollment,
+} from "../controllers/enrollment.js";
+import { auth } from "../middlewares/index.js";
 
-const courseRoute = express.Router();
+const enrollmentRoute = express.Router();
 
-courseRoute.get("/", auth, roles(["admin", "teacher"]), getCourses);
-courseRoute.post("/", auth, roles(["admin", "teacher"]), createCourse);
-courseRoute.get("/:id", auth, roles(["admin", "teacher"]), getCourseById);
-courseRoute.patch("/:id", auth, roles(["admin", "teacher"]), updateCourse);
-courseRoute.delete("/:id", auth, roles(["admin", "teacher"]), deleteCourse);
+enrollmentRoute.get("/", auth, getEnrollments);
+enrollmentRoute.post("/", auth, createEnrollment);
+enrollmentRoute.get("/:id", auth, getEnrollmentById);
+enrollmentRoute.patch("/:id", auth, updateEnrollment);
+enrollmentRoute.delete("/:id", auth, deleteEnrollment);
 
-export default courseRoute;
+export default enrollmentRoute;

@@ -1,5 +1,5 @@
 import { ORDER, PAGER } from "../constants/index.js";
-import { generateCommonServices } from "./utils.js";
+import { generateCommonServices, keyConvertWrapper } from "./utils.js";
 
 export const defaultClass = {
   id: null,
@@ -22,9 +22,6 @@ export const defaultClass = {
 
 // commonServices
 const commonServices = generateCommonServices("classes");
-
-// other services
-const findStudentClasses = async () => {};
 
 // model
 const classModel = {

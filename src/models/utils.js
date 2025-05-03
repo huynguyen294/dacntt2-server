@@ -41,7 +41,7 @@ export const generateCommonServices = (tableName) => {
     }),
 
     find: keyConvertWrapper(async (filter = {}, pager, order, fields) => {
-      const [pagerGenerated, pagerStr] = await generatePager(filter, pager);
+      const [pagerGenerated, pagerStr] = await generatePager(tableName, filter, pager);
       const orderStr = generateOrderStr(order);
       const fieldsStr = generateFieldsStr(fields);
 

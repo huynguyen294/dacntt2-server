@@ -6,7 +6,7 @@ export const getEnrollments = async (req, res, next) => {
   try {
     const filterObj = transformQueryToFilterObject(req.query);
 
-    const [rows, pager] = await enrollmentModel.find(filterObj, { pager: req.pager, order: req.order });
+    const [rows, pager] = await enrollmentModel.find(filterObj, req.pager, req.order);
     res.status(201).json({ courses: rows, pager });
   } catch (error) {
     next(error);
@@ -31,7 +31,7 @@ export const getEnrollmentById = async (req, res, next) => {
 
   try {
     const course = await enrollmentModel.findById(id);
-    if (!course) return res.status(404).json({ message: "Không tìm thấy khóa học!" });
+    if (!course) return res.status(404).json({ message: "Không tìm thấy đăng ký lớp!" });
     res.status(201).json({ course });
   } catch (error) {
     next(error);
@@ -59,7 +59,7 @@ export const deleteEnrollment = async (req, res, next) => {
 
   try {
     await enrollmentModel.delete(id);
-    res.status(201).json({ message: "Xóa khóa học thành công!" });
+    res.status(201).json({ message: "Xóa đăng ký lớp thành công!" });
   } catch (error) {
     next(error);
   }
