@@ -1,4 +1,5 @@
 import pgDB from "../configs/db.js";
+import camelCase from "lodash/camelCase.js";
 import { ORDER, PAGER } from "../constants/index.js";
 import { convertToSnakeShallow } from "../utils/index.js";
 import { defaultEmployee } from "./employeeModel.js";
@@ -35,15 +36,18 @@ const commonServices = generateCommonServices("users");
 // other services
 const findEmployee = keyConvertWrapper(
   async (filter = { ...defaultUser, ...defaultEmployee }, pager = PAGER, order = ORDER) => {
-    const userFilter = filterPropertyByDefaultObject(filter, defaultUser, ["search"]);
-    const employeeFilter = filterPropertyByDefaultObject(filter, defaultEmployee);
+    const defaultUserConverted = convertToSnakeShallow(defaultUser);
+    const defaultEmployeeConverted = convertToSnakeShallow(defaultEmployee);
+
+    const userFilter = filterPropertyByDefaultObject(filter, defaultUserConverted, ["search"]);
+    const employeeFilter = filterPropertyByDefaultObject(filter, defaultEmployeeConverted);
     const filterMerged = mergeFilterByShortName({ u: userFilter, e: employeeFilter });
 
     const [pagerGenerated, pagerStr] = await generatePager("users", userFilter, pager);
 
-    const orderShortName = defaultUser.hasOwnProperty(order.order_by) ? "u" : "e";
+    const orderShortName = defaultUserConverted.hasOwnProperty(order.order_by) ? "u" : "e";
     const orderStr = generateOrderStr(order, orderShortName);
-    const { id, userId, ...employeeFields } = convertToSnakeShallow(defaultEmployee);
+    const { id, user_id, ...employeeFields } = defaultEmployeeConverted;
     const fieldsStr =
       `u.*, e.id AS employee_id, ` +
       Object.keys(employeeFields)
@@ -67,7 +71,7 @@ const findEmployee = keyConvertWrapper(
 );
 
 const findEmployeeById = keyConvertWrapper(async (id) => {
-  const { id: employeeId, userId, ...employeeFields } = convertToSnakeShallow(defaultEmployee);
+  const { id: employeeId, user_id, ...employeeFields } = convertToSnakeShallow(defaultEmployee);
   const fieldsStr =
     `u.*, e.id AS employee_id, ` +
     Object.keys(employeeFields)
