@@ -215,7 +215,7 @@ export const updateUserWithRole = async (req, res, next) => {
     const updatedUser = await userModel.updateById(id, userData);
 
     const refs = {};
-    if (EMPLOYEE_ROLES.concat("teachers").includes(paramRole)) {
+    if (EMPLOYEE_ROLES.concat("teacher").includes(paramRole)) {
       if (employeeId) {
         employeeData.userId = userId || id;
         const result = await employeeModel.updateById(employeeId, employeeData);
