@@ -133,22 +133,6 @@ CREATE INDEX IF NOT EXISTS idx_student_consultation_phone_number_trgm ON student
 --    SET NULL);
 -- CREATE INDEX IF NOT EXISTS idx_rooms_name_trgm ON rooms USING GIN (name gin_trgm_ops);
 -- ;
--- create table rooms if not exits;
-CREATE TABLE IF NOT EXISTS enrollments (
-    id SERIAL PRIMARY KEY,
-    last_updated_at TIMESTAMPTZ DEFAULT NOW(),
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    user_id INT REFERENCES users(id) ON DELETE
-    SET NULL,
-        class_id INT REFERENCES classes(id) ON DELETE
-    SET NULL,
-        last_updated_by INT REFERENCES users(id) ON DELETE
-    SET NULL,
-        created_by INT REFERENCES users(id) ON DELETE
-    SET NULL
-);
-CREATE INDEX IF NOT EXISTS idx_enrollments_class_id ON enrollments (class_id);
-CREATE INDEX IF NOT EXISTS idx_enrollments_user_id ON enrollments (user_id);
 -- ;
 -- create table classes if not exits;
 CREATE TABLE IF NOT EXISTS classes (
@@ -172,3 +156,19 @@ CREATE TABLE IF NOT EXISTS classes (
     SET NULL
 );
 CREATE INDEX IF NOT EXISTS idx_classes_course_id ON classes (course_id);
+-- create table enrollments if not exits;
+CREATE TABLE IF NOT EXISTS enrollments (
+    id SERIAL PRIMARY KEY,
+    last_updated_at TIMESTAMPTZ DEFAULT NOW(),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    user_id INT REFERENCES users(id) ON DELETE
+    SET NULL,
+        class_id INT REFERENCES classes(id) ON DELETE
+    SET NULL,
+        last_updated_by INT REFERENCES users(id) ON DELETE
+    SET NULL,
+        created_by INT REFERENCES users(id) ON DELETE
+    SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_enrollments_class_id ON enrollments (class_id);
+CREATE INDEX IF NOT EXISTS idx_enrollments_user_id ON enrollments (user_id);
