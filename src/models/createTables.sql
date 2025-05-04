@@ -1,3 +1,5 @@
+--set schema
+SET search_path TO public;
 -- extension define;
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 -- ;
