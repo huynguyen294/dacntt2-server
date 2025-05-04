@@ -166,7 +166,7 @@ export const createUserWithRole = async (req, res, next) => {
 
     const refs = {};
     const newUser = await userModel.create(userData);
-    if (EMPLOYEE_ROLES.includes(paramRole)) {
+    if (EMPLOYEE_ROLES.concat("teacher").includes(paramRole)) {
       employeeData.userId = newUser.id;
       const newEmployee = await employeeModel.create(employeeData);
       refs.userEmployees = { [newUser.id]: newEmployee };
@@ -215,7 +215,7 @@ export const updateUserWithRole = async (req, res, next) => {
     const updatedUser = await userModel.updateById(id, userData);
 
     const refs = {};
-    if (EMPLOYEE_ROLES.includes(paramRole)) {
+    if (EMPLOYEE_ROLES.concat("teachers").includes(paramRole)) {
       if (employeeId) {
         employeeData.userId = userId || id;
         const result = await employeeModel.updateById(employeeId, employeeData);

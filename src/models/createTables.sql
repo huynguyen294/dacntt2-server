@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS users (
 -- ;
 -- user indexes;
 CREATE INDEX IF NOT EXISTS idx_role ON users (role);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);
 CREATE INDEX IF NOT EXISTS idx_users_name_trgm ON users USING GIN (name gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS idx_users_email_trgm ON users USING GIN (email gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS idx_users_phone_number_trgm ON users USING GIN (phone_number gin_trgm_ops);
