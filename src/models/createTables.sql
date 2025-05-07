@@ -84,14 +84,14 @@ CREATE TABLE IF NOT EXISTS courses (
     status VARCHAR(255) NOT NULL,
     last_updated_at TIMESTAMPTZ DEFAULT NOW(),
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    certificate_id INT REFERENCES certificates(id) ON DELETE
-    SET NULL,
-        last_updated_by INT REFERENCES users(id) ON DELETE
+    --    certificate_id INT REFERENCES certificates(id) ON DELETE
+    --    SET NULL,
+    last_updated_by INT REFERENCES users(id) ON DELETE
     SET NULL,
         created_by INT REFERENCES users(id) ON DELETE
     SET NULL
 );
-CREATE INDEX IF NOT EXISTS idx_courses_user_id ON courses (certificate_id);
+-- CREATE INDEX IF NOT EXISTS idx_courses_certificate_id ON courses (certificate_id);
 CREATE INDEX IF NOT EXISTS idx_courses_name_trgm ON courses USING GIN (name gin_trgm_ops);
 -- ;
 -- create table student_consultation if not exits;
@@ -151,8 +151,6 @@ CREATE TABLE IF NOT EXISTS shifts (
         created_by INT REFERENCES users(id) ON DELETE
     SET NULL
 );
-CREATE INDEX IF NOT EXISTS idx_shifts_user_id ON shifts (certificate_id);
-CREATE INDEX IF NOT EXISTS idx_shifts_name_trgm ON shifts USING GIN (name gin_trgm_ops);
 --;
 -- create table classes if not exits;
 CREATE TABLE IF NOT EXISTS classes (
