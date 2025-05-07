@@ -1,36 +1,30 @@
 import { ORDER, PAGER } from "../constants/index.js";
 import { generateCommonServices } from "./utils.js";
 
-export const defaultClass = {
+export const defaultShifts = {
   id: null,
   name: null,
-  cost: null,
-  weekDays: null,
-  shifts: null,
-  openingDay: null,
-  closingDay: null,
-  numberOfLessons: null,
-  numberOfStudents: null,
-  status: null,
+  startTime: null,
+  endTime: null,
   lastUpdatedAt: null,
   createdAt: null,
-  courseId: null,
-  teacherId: null,
   lastUpdatedBy: null,
   createdBy: null,
 };
 
 // commonServices
-const commonServices = generateCommonServices("classes");
+const commonServices = generateCommonServices("courses");
+
+// other services
 
 // model
-const classModel = {
+const courseModel = {
   ...commonServices,
   // field suggestion for find funcs
-  find: async (filter = defaultClass, pager = PAGER, order = ORDER, fields = []) => {
+  find: async (filter = defaultShifts, pager = PAGER, order = ORDER, fields = []) => {
     return commonServices.find(filter, pager, order, fields);
   },
-  findOne: async (filter = defaultClass, fields = []) => {
+  findOne: async (filter = defaultShifts, fields = []) => {
     return commonServices.findOne(filter, fields);
   },
   exists: async (filter = defaultEmployee) => {
@@ -38,4 +32,4 @@ const classModel = {
   },
 };
 
-export default classModel;
+export default courseModel;

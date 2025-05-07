@@ -3,7 +3,7 @@ import { generateCommonServices } from "./utils.js";
 
 export const defaultCourse = {
   id: null,
-  email: null,
+  name: null,
   level: null,
   numberOfLessons: null,
   status: null,

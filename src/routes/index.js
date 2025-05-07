@@ -13,7 +13,7 @@ const route = (app) => {
   app.use("/api-v1/enrollments", enrollmentRoute);
   app.use("/api-v1/db", dbRoute);
   app.use((req, res, next) => {
-    res.status(404).json({ message: "Không tìm thấy đường dẫn!" });
+    res.send("Không tìm thấy đường dẫn!");
   });
 };
 

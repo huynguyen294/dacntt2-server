@@ -3,8 +3,8 @@ import { generateCommonServices } from "./utils.js";
 
 export const defaultEnrollment = {
   id: null,
-  class_id: null,
-  user_id: null,
+  classId: null,
+  userId: null,
 };
 
 // commonServices

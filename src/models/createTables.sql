@@ -50,11 +50,11 @@ CREATE TABLE IF NOT EXISTS employees (
     id SERIAL PRIMARY KEY,
     user_id INT REFERENCES users(id) ON DELETE CASCADE,
     salary INT NOT NULL,
+    status VARCHAR(255) NOT NULL,
     employment_type VARCHAR(100) NOT NULL,
     major VARCHAR(255) NOT NULL,
     certificates VARCHAR(255),
     start_date DATE,
-    status VARCHAR(255) NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     note TEXT
 );
@@ -63,8 +63,7 @@ CREATE INDEX IF NOT EXISTS idx_employees_user_id ON employees (user_id);
 -- create table certificates if not exits;
 CREATE TABLE IF NOT EXISTS certificates (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    issuing_agency VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL,
     image_url TEXT,
     status VARCHAR(255),
     last_updated_at TIMESTAMPTZ DEFAULT NOW(),
@@ -85,11 +84,14 @@ CREATE TABLE IF NOT EXISTS courses (
     status VARCHAR(255) NOT NULL,
     last_updated_at TIMESTAMPTZ DEFAULT NOW(),
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    last_updated_by INT REFERENCES users(id) ON DELETE
+    certificate_id INT REFERENCES certificates(id) ON DELETE
+    SET NULL,
+        last_updated_by INT REFERENCES users(id) ON DELETE
     SET NULL,
         created_by INT REFERENCES users(id) ON DELETE
     SET NULL
 );
+CREATE INDEX IF NOT EXISTS idx_courses_user_id ON courses (certificate_id);
 CREATE INDEX IF NOT EXISTS idx_courses_name_trgm ON courses USING GIN (name gin_trgm_ops);
 -- ;
 -- create table student_consultation if not exits;
@@ -136,14 +138,28 @@ CREATE INDEX IF NOT EXISTS idx_student_consultation_phone_number_trgm ON student
 --    SET NULL);
 -- CREATE INDEX IF NOT EXISTS idx_rooms_name_trgm ON rooms USING GIN (name gin_trgm_ops);
 -- ;
--- ;
+-- create table shifts if not exits;
+CREATE TABLE IF NOT EXISTS shifts (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    last_updated_at TIMESTAMPTZ DEFAULT NOW(),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    last_updated_by INT REFERENCES users(id) ON DELETE
+    SET NULL,
+        created_by INT REFERENCES users(id) ON DELETE
+    SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_shifts_user_id ON shifts (certificate_id);
+CREATE INDEX IF NOT EXISTS idx_shifts_name_trgm ON shifts USING GIN (name gin_trgm_ops);
+--;
 -- create table classes if not exits;
 CREATE TABLE IF NOT EXISTS classes (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     cost INT NOT NULL,
     week_days VARCHAR(100) NOT NULL,
-    shifts VARCHAR(100) NOT NULL,
     opening_day DATE DEFAULT NOW(),
     closing_day DATE NOT NULL,
     number_of_lessons INT NOT NULL,
@@ -159,12 +175,16 @@ CREATE TABLE IF NOT EXISTS classes (
     SET NULL
 );
 CREATE INDEX IF NOT EXISTS idx_classes_course_id ON classes (course_id);
+--;
 -- create table enrollments if not exits;
 CREATE TABLE IF NOT EXISTS enrollments (
     id SERIAL PRIMARY KEY,
+    status VARCHAR(255) NOT NULL,
     last_updated_at TIMESTAMPTZ DEFAULT NOW(),
     created_at TIMESTAMPTZ DEFAULT NOW(),
     user_id INT REFERENCES users(id) ON DELETE
+    SET NULL,
+        shifts_id INT REFERENCES shifts(id) ON DELETE
     SET NULL,
         class_id INT REFERENCES classes(id) ON DELETE
     SET NULL,
@@ -173,5 +193,9 @@ CREATE TABLE IF NOT EXISTS enrollments (
         created_by INT REFERENCES users(id) ON DELETE
     SET NULL
 );
+CREATE INDEX IF NOT EXISTS status ON enrollments (status);
 CREATE INDEX IF NOT EXISTS idx_enrollments_class_id ON enrollments (class_id);
 CREATE INDEX IF NOT EXISTS idx_enrollments_user_id ON enrollments (user_id);
+CREATE INDEX IF NOT EXISTS idx_enrollments_shifts_id ON enrollments (shifts_id);
+--;
+-- init data enrollments if not exits;
