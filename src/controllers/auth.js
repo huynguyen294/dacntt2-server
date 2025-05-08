@@ -17,7 +17,7 @@ export const generateNewAccessToken = async (req, res, next) => {
 
       const { email, id, userRole } = decoded;
       const newAccessToken = jwt.sign({ email, id, userRole }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "1h" });
-      res.status(201).json({ newAccessToken });
+      res.status(200).json({ newAccessToken });
     });
   } catch (error) {
     next(error, req, res, next);

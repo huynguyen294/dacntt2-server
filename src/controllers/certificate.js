@@ -7,7 +7,7 @@ export const getCertificates = async (req, res, next) => {
     const filterObj = transformQueryToFilterObject(req.query);
 
     const [rows, pager] = await certificateModel.find(filterObj, req.pager, req.order);
-    res.status(201).json({ certificates: rows, pager });
+    res.status(200).json({ certificates: rows, pager });
   } catch (error) {
     next(error);
   }

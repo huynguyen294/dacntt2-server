@@ -7,7 +7,7 @@ export const getEnrollments = async (req, res, next) => {
     const filterObj = transformQueryToFilterObject(req.query);
 
     const [rows, pager] = await enrollmentModel.find(filterObj, req.pager, req.order);
-    res.status(201).json({ courses: rows, pager });
+    res.status(200).json({ courses: rows, pager });
   } catch (error) {
     next(error);
   }

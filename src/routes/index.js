@@ -4,6 +4,7 @@ import authRoute from "./auth.js";
 import courseRoute from "./course.js";
 import classRoute from "./class.js";
 import enrollmentRoute from "./enrollment.js";
+import imageRoute from "./image.js";
 
 const route = (app) => {
   app.use("/api-v1/auth", authRoute);
@@ -11,6 +12,7 @@ const route = (app) => {
   app.use("/api-v1/courses", courseRoute);
   app.use("/api-v1/classes", classRoute);
   app.use("/api-v1/enrollments", enrollmentRoute);
+  app.use("/api-v1/images", imageRoute);
   app.use("/api-v1/db", dbRoute);
   app.use((req, res, next) => {
     res.send("Không tìm thấy đường dẫn!");

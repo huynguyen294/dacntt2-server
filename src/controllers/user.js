@@ -20,7 +20,7 @@ export const getAllUsers = async (req, res, next) => {
       refs.users = arrayToObject(users);
     }
 
-    res.status(201).json({ users: rows, pager, refs });
+    res.status(200).json({ users: rows, pager, refs });
   } catch (error) {
     next(error);
   }
@@ -34,13 +34,13 @@ export const getUsersWithRole = async (req, res, next) => {
     const filterObj = transformQueryToFilterObject(req.query);
     if (role === "_") {
       const [rows, pager] = await userModel.find(filterObj, req.pager, req.order);
-      return res.status(201).json({ users: rows, pager });
+      return res.status(200).json({ users: rows, pager });
     }
 
     filterObj.role = role;
     if (["consultant", "finance-officer"].includes(role)) {
       const [rows, pager] = await userModel.findEmployee(filterObj, req.pager, req.order);
-      return res.status(201).json({ users: rows, pager });
+      return res.status(200).json({ users: rows, pager });
     }
 
     const refs = {};
@@ -52,13 +52,13 @@ export const getUsersWithRole = async (req, res, next) => {
       //   refs.teacherClasses = groupBy(rows, "teacherId");
       // }
 
-      return res.status(201).json({ users: rows, pager, refs });
+      return res.status(200).json({ users: rows, pager, refs });
     }
 
     if (role === "student") {
       const [rows, pager] = await userModel.find(filterObj, req.pager, req.order);
       // get class
-      return res.status(201).json({ users: rows, pager, refs });
+      return res.status(200).json({ users: rows, pager, refs });
     }
   } catch (error) {
     next(error);
@@ -89,7 +89,7 @@ export const getUserById = async (req, res, next) => {
   const { id } = req.params;
   try {
     const user = await userModel.findById(id);
-    res.status(201).json({ user });
+    res.status(200).json({ user });
   } catch (error) {
     next(error);
   }
