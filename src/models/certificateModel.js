@@ -13,7 +13,7 @@ export const defaultCertificate = {
 };
 
 // commonServices
-const commonServices = generateCommonServices("courses");
+const commonServices = generateCommonServices("certificates");
 
 // other services
 

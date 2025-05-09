@@ -13,7 +13,7 @@ export const defaultShifts = {
 };
 
 // commonServices
-const commonServices = generateCommonServices("courses");
+const commonServices = generateCommonServices("shifts");
 
 // other services
 
