@@ -4,7 +4,7 @@ import { transformQueryToFilterObject } from "../utils/index.js";
 //[GET] /courses
 export const getCourses = async (req, res, next) => {
   try {
-    const filterObj = transformQueryToFilterObject(req.query);
+    const filterObj = transformQueryToFilterObject(req.query, ["name"]);
 
     const [rows, pager] = await courseModel.find(filterObj, req.pager, req.order);
     res.status(200).json({ courses: rows, pager });

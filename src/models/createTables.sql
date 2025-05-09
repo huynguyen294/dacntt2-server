@@ -78,9 +78,11 @@ CREATE INDEX IF NOT EXISTS idx_certificates_name_trgm ON certificates USING GIN 
 -- create table courses if not exits;
 CREATE TABLE IF NOT EXISTS courses (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    level VARCHAR(255),
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    level INT,
     number_of_lessons INT NOT NULL,
+    tuition_fee INT NOT NULL,
     status VARCHAR(255) NOT NULL,
     last_updated_at TIMESTAMPTZ DEFAULT NOW(),
     created_at TIMESTAMPTZ DEFAULT NOW(),

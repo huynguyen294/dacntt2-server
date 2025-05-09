@@ -4,7 +4,6 @@ import { generateCommonServices } from "./utils.js";
 export const defaultCertificate = {
   id: null,
   name: null,
-  issuingAgency: null,
   imageUrl: null,
   status: null,
   lastUpdatedAt: null,
