@@ -1,19 +1,19 @@
 import express from "express";
-import {
-  createCertificate,
-  deleteCertificate,
-  getCertificateById,
-  getCertificates,
-  updateCertificate,
-} from "../controllers/certificate.js";
 import { auth, roles } from "../middlewares/index.js";
+import { generateCRUDRoutes } from "./utils.js";
+import certificateController from "../controllers/certificate.js";
 
-const certificateRoute = express.Router();
+const examRoute = express.Router();
 
-certificateRoute.get("/", auth, roles(["admin"]), getCertificates);
-certificateRoute.post("/", auth, roles(["admin"]), createCertificate);
-certificateRoute.get("/:id", auth, roles(["admin"]), getCertificateById);
-certificateRoute.patch("/:id", auth, roles(["admin"]), updateCertificate);
-certificateRoute.delete("/:id", auth, roles(["admin"]), deleteCertificate);
+const commonMiddlewares = [auth, roles(["admin"])];
+generateCRUDRoutes(examRoute, certificateController, {
+  middlewares: {
+    get: commonMiddlewares,
+    create: commonMiddlewares,
+    getById: commonMiddlewares,
+    update: commonMiddlewares,
+    delete: commonMiddlewares,
+  },
+});
 
-export default certificateRoute;
+export default examRoute;
