@@ -6,3 +6,5 @@ export { default as classModel } from "./classModel.js";
 export { default as enrollmentModel } from "./enrollmentModel.js";
 export { default as certificateModel } from "./certificateModel.js";
 export { default as shiftModel } from "./shiftModel.js";
+export { default as examModel } from "./examModel.js";
+export { default as studentExamModel } from "./studentExamModel.js";

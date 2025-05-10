@@ -131,7 +131,7 @@ export const generatePager = async (tableName, filter = {}, pager) => {
   console.log("generatePager", finalQuery);
   const result = await pgDB.query(finalQuery, values);
   const total = Number(result.rows[0].count);
-  const page_count = Math.ceil(total / page_size);
+  const page_count = Math.ceil(total / page_size) || 1;
   const pagerGenerated = { total, page_count, page, page_size };
   const pagerStr = ` LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
 

@@ -66,6 +66,8 @@ CREATE TABLE IF NOT EXISTS certificates (
     name VARCHAR(255) NOT NULL,
     image_url TEXT,
     status VARCHAR(255),
+    skill VARCHAR(255),
+    level VARCHAR(255),
     last_updated_at TIMESTAMPTZ DEFAULT NOW(),
     created_at TIMESTAMPTZ DEFAULT NOW(),
     last_updated_by INT REFERENCES users(id) ON DELETE
@@ -175,6 +177,7 @@ CREATE TABLE IF NOT EXISTS classes (
     SET NULL
 );
 CREATE INDEX IF NOT EXISTS idx_classes_course_id ON classes (course_id);
+CREATE INDEX IF NOT EXISTS idx_classes_name_trgm ON classes USING GIN (name gin_trgm_ops);
 --;
 -- create table enrollments if not exits;
 CREATE TABLE IF NOT EXISTS enrollments (
@@ -198,4 +201,30 @@ CREATE INDEX IF NOT EXISTS idx_enrollments_class_id ON enrollments (class_id);
 CREATE INDEX IF NOT EXISTS idx_enrollments_user_id ON enrollments (user_id);
 CREATE INDEX IF NOT EXISTS idx_enrollments_shifts_id ON enrollments (shifts_id);
 --;
--- init data enrollments if not exits;
+-- create table exams if not exits;
+CREATE TABLE IF NOT EXISTS exams (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    date DATE NOT NULL,
+    time TIME NOT NULL,
+    location TEXT,
+    last_updated_at TIMESTAMPTZ DEFAULT NOW(),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    last_updated_by INT REFERENCES users(id) ON DELETE
+    SET NULL,
+        created_by INT REFERENCES users(id) ON DELETE
+    SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_exams_name_trgm ON exams USING GIN (name gin_trgm_ops);
+--;
+-- create table student_exam if not exits;
+CREATE TABLE IF NOT EXISTS student_exam (
+    id SERIAL PRIMARY KEY,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    exam_id INT REFERENCES exams(id) ON DELETE
+    SET NULL,
+        student_id INT REFERENCES users(id) ON DELETE
+    SET NULL,
+        created_by INT REFERENCES users(id) ON DELETE
+    SET NULL
+);
