@@ -4,7 +4,7 @@ import { transformQueryToFilterObject } from "../utils/index.js";
 //[GET] /classes
 export const getClasses = async (req, res, next) => {
   try {
-    const filterObj = transformQueryToFilterObject(req.query);
+    const filterObj = transformQueryToFilterObject(req.query, ["name"]);
 
     const [rows, pager] = await classModel.find(filterObj, req.pager, req.order);
     res.status(200).json({ classes: rows, pager });
