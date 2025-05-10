@@ -9,7 +9,7 @@ const allowedUpdateUser = ["admin"];
 //[GET] /users
 export const getAllUsers = async (req, res, next) => {
   try {
-    const filterObj = transformQueryToFilterObject(req.query);
+    const filterObj = transformQueryToFilterObject(req.query, ["phone_number", "email", "name"]);
 
     const [rows, pager] = await userModel.find(filterObj, req.pager, req.order);
 

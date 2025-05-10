@@ -16,7 +16,7 @@ export const convertToCamelShallow = (value) => {
   return mapKeys(value, (_, key) => camelCase(key));
 };
 
-export const transformQueryToFilterObject = (query, searchFields = ["phone_number", "email", "name"]) => {
+export const transformQueryToFilterObject = (query, searchFields = ["name"]) => {
   const { searchQuery, filter } = query;
 
   const filterObj = {};
