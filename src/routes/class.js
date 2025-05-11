@@ -1,13 +1,19 @@
 import express from "express";
-import { createClass, deleteClass, getClassById, getClasses, updateClass } from "../controllers/class.js";
 import { auth, roles } from "../middlewares/index.js";
+import { generateCRUDRoutes } from "./utils.js";
+import classController from "../controllers/class.js";
 
 const classRoute = express.Router();
 
-classRoute.get("/", auth, roles(["admin", "finance-officer"]), getClasses);
-classRoute.post("/", auth, roles(["admin", "finance-officer"]), createClass);
-classRoute.get("/:id", auth, roles(["admin", "finance-officer"]), getClassById);
-classRoute.patch("/:id", auth, roles(["admin", "finance-officer"]), updateClass);
-classRoute.delete("/:id", auth, roles(["admin", "finance-officer"]), deleteClass);
+const commonMiddlewares = [auth, roles(["admin", "finance-officer"])];
+generateCRUDRoutes(classRoute, classController, {
+  middlewares: {
+    get: commonMiddlewares,
+    create: commonMiddlewares,
+    getById: commonMiddlewares,
+    update: commonMiddlewares,
+    delete: commonMiddlewares,
+  },
+});
 
 export default classRoute;

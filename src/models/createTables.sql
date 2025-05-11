@@ -160,22 +160,30 @@ CREATE TABLE IF NOT EXISTS shifts (
 CREATE TABLE IF NOT EXISTS classes (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    cost INT NOT NULL,
+    tuition_fee INT NOT NULL,
     week_days VARCHAR(100) NOT NULL,
     opening_day DATE DEFAULT NOW(),
     closing_day DATE NOT NULL,
     number_of_lessons INT NOT NULL,
     number_of_students INT NOT NULL,
     status VARCHAR(255),
+    level INT,
+    description TEXT,
     last_updated_at TIMESTAMPTZ DEFAULT NOW(),
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    course_id INT REFERENCES courses(id) ON DELETE
+    shift_id INT REFERENCES shifts(id) ON DELETE
+    SET NULL,
+        course_id INT REFERENCES courses(id) ON DELETE
+    SET NULL,
+        teacher_id INT REFERENCES users(id) ON DELETE
     SET NULL,
         last_updated_by INT REFERENCES users(id) ON DELETE
     SET NULL,
         created_by INT REFERENCES users(id) ON DELETE
     SET NULL
 );
+CREATE INDEX IF NOT EXISTS idx_classes_shift_id ON classes (shift_id);
+CREATE INDEX IF NOT EXISTS idx_classes_teacher_id ON classes (teacher_id);
 CREATE INDEX IF NOT EXISTS idx_classes_course_id ON classes (course_id);
 CREATE INDEX IF NOT EXISTS idx_classes_name_trgm ON classes USING GIN (name gin_trgm_ops);
 --;
@@ -187,8 +195,6 @@ CREATE TABLE IF NOT EXISTS enrollments (
     created_at TIMESTAMPTZ DEFAULT NOW(),
     user_id INT REFERENCES users(id) ON DELETE
     SET NULL,
-        shifts_id INT REFERENCES shifts(id) ON DELETE
-    SET NULL,
         class_id INT REFERENCES classes(id) ON DELETE
     SET NULL,
         last_updated_by INT REFERENCES users(id) ON DELETE
@@ -199,7 +205,6 @@ CREATE TABLE IF NOT EXISTS enrollments (
 CREATE INDEX IF NOT EXISTS status ON enrollments (status);
 CREATE INDEX IF NOT EXISTS idx_enrollments_class_id ON enrollments (class_id);
 CREATE INDEX IF NOT EXISTS idx_enrollments_user_id ON enrollments (user_id);
-CREATE INDEX IF NOT EXISTS idx_enrollments_shifts_id ON enrollments (shifts_id);
 --;
 -- create table exams if not exits;
 CREATE TABLE IF NOT EXISTS exams (
