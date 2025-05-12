@@ -3,6 +3,7 @@ import { transformQueryToFilterObject } from "../utils/index.js";
 
 export const generateCRUD = (model, isJunctionTable = false) => {
   return {
+    // [GET] ${model.tableName}/
     get: async (req, res, next) => {
       try {
         const filterObj = transformQueryToFilterObject(req.query, ["name"]);
@@ -13,6 +14,8 @@ export const generateCRUD = (model, isJunctionTable = false) => {
         next(error);
       }
     },
+
+    // [POST] ${model.tableName}/
     create: async (req, res, next) => {
       try {
         const data = req.body;
@@ -28,6 +31,8 @@ export const generateCRUD = (model, isJunctionTable = false) => {
         next(error);
       }
     },
+
+    // [GET] ${model.tableName}/:id
     getById: async (req, res, next) => {
       const { id } = req.params;
 
@@ -39,6 +44,8 @@ export const generateCRUD = (model, isJunctionTable = false) => {
         next(error);
       }
     },
+
+    // [PATCH] ${model.tableName}/:id
     update: async (req, res, next) => {
       const { id } = req.params;
       const data = req.body;
@@ -55,6 +62,8 @@ export const generateCRUD = (model, isJunctionTable = false) => {
         next(error);
       }
     },
+
+    // [DELETE] ${model.tableName}/:id
     delete: async (req, res, next) => {
       const { id } = req.params;
 

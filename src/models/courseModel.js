@@ -17,6 +17,16 @@ export const defaultCourse = {
 const commonServices = generateCommonServices("courses");
 
 // other services
+const getFields = (type) => {
+  switch (type) {
+    case "full":
+      return [];
+    case "basic":
+      return ["id", "name"];
+    default:
+      return [];
+  }
+};
 
 // model
 const courseModel = {
@@ -31,6 +41,7 @@ const courseModel = {
   exists: async (filter = defaultEmployee) => {
     return commonServices.exists(filter);
   },
+  getFields,
 };
 
 export default courseModel;

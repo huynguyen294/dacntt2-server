@@ -16,6 +16,16 @@ export const defaultShifts = {
 const commonServices = generateCommonServices("shifts");
 
 // other services
+const getFields = (type) => {
+  switch (type) {
+    case "full":
+      return [];
+    case "basic":
+      return ["id", "name", "start_time", "end_time"];
+    default:
+      return [];
+  }
+};
 
 // model
 const courseModel = {
@@ -30,6 +40,7 @@ const courseModel = {
   exists: async (filter = defaultEmployee) => {
     return commonServices.exists(filter);
   },
+  getFields,
 };
 
 export default courseModel;

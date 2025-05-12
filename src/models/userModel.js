@@ -1,5 +1,4 @@
 import pgDB from "../configs/db.js";
-import camelCase from "lodash/camelCase.js";
 import { ORDER, PAGER } from "../constants/index.js";
 import { convertToSnakeShallow } from "../utils/index.js";
 import { defaultEmployee } from "./employeeModel.js";
@@ -86,6 +85,17 @@ const findEmployeeById = keyConvertWrapper(async (id) => {
   return result.rows[0] ?? null;
 });
 
+const getFields = (type) => {
+  switch (type) {
+    case "full":
+      return [];
+    case "basic":
+      return ["id", "name", "email", "role"];
+    default:
+      return [];
+  }
+};
+
 // model
 const userModel = {
   ...commonServices,
@@ -100,6 +110,7 @@ const userModel = {
     return commonServices.exists(filter);
   },
   // other services
+  getFields,
   findEmployee,
   findEmployeeById,
 };

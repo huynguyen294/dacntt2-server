@@ -4,6 +4,8 @@ import { convertToCamelShallow, convertToSnakeShallow } from "../utils/index.js"
 
 export const generateCommonServices = (tableName) => {
   return {
+    tableName,
+
     create: keyConvertWrapper(async (data) => {
       const fields = Object.keys(data);
       const fieldsStr = fields.join(", ");
