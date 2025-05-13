@@ -8,3 +8,4 @@ export { default as certificateModel } from "./certificateModel.js";
 export { default as shiftModel } from "./shiftModel.js";
 export { default as examModel } from "./examModel.js";
 export { default as studentExamModel } from "./studentExamModel.js";
+export { default as studentConsultation } from "./studentConsultation.js";

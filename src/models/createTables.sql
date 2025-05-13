@@ -105,15 +105,19 @@ CREATE TABLE IF NOT EXISTS student_consultation (
     gender VARCHAR(50),
     email VARCHAR(100) UNIQUE NOT NULL,
     phone_number VARCHAR(100),
+    date_of_birth DATE,
+    address VARCHAR(255),
     status VARCHAR(255),
     priority VARCHAR(255),
     source VARCHAR(255),
     note TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     last_updated_at TIMESTAMPTZ DEFAULT NOW(),
-    expected_course_id INT REFERENCES courses(id) ON DELETE
+    consultant_id INT REFERENCES users(id) ON DELETE
     SET NULL,
-        consultant_id INT REFERENCES users(id) ON DELETE
+        expected_course_id INT REFERENCES courses(id) ON DELETE
+    SET NULL,
+        expected_class_id INT REFERENCES classes(id) ON DELETE
     SET NULL,
         last_updated_by INT REFERENCES users(id) ON DELETE
     SET NULL,
@@ -123,6 +127,7 @@ CREATE TABLE IF NOT EXISTS student_consultation (
 -- ;
 -- student_consultation indexes;
 CREATE INDEX IF NOT EXISTS idx_student_consultation_expected_course_id ON student_consultation (expected_course_id);
+CREATE INDEX IF NOT EXISTS idx_student_consultation_expected_class_id ON student_consultation (expected_class_id);
 CREATE INDEX IF NOT EXISTS idx_student_consultation_consultant_id ON student_consultation (consultant_id);
 CREATE INDEX IF NOT EXISTS idx_student_consultation_name_trgm ON student_consultation USING GIN (name gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS idx_student_consultation_email_trgm ON student_consultation USING GIN (email gin_trgm_ops);
@@ -225,11 +230,14 @@ CREATE INDEX IF NOT EXISTS idx_exams_name_trgm ON exams USING GIN (name gin_trgm
 -- create table student_exam if not exits;
 CREATE TABLE IF NOT EXISTS student_exam (
     id SERIAL PRIMARY KEY,
+    last_updated_at TIMESTAMPTZ DEFAULT NOW(),
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    exam_id INT REFERENCES exams(id) ON DELETE
-    SET NULL,
-        student_id INT REFERENCES users(id) ON DELETE
+    last_updated_by INT REFERENCES users(id) ON DELETE
     SET NULL,
         created_by INT REFERENCES users(id) ON DELETE
+    SET NULL,
+        exam_id INT REFERENCES exams(id) ON DELETE
+    SET NULL,
+        student_id INT REFERENCES users(id) ON DELETE
     SET NULL
 );

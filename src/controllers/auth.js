@@ -5,7 +5,6 @@ import { userModel } from "../models/index.js";
 //[GET] /auth/new-access-token
 export const generateNewAccessToken = async (req, res, next) => {
   const refreshToken = req.cookies.dacntt1_rf_t;
-  console.log({ refreshToken });
 
   try {
     jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, decoded) => {

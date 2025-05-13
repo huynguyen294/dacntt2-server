@@ -1,10 +1,16 @@
 import { ORDER, PAGER } from "../constants/index.js";
 import { generateCommonServices } from "./utils.js";
 
+// assign student into class
+
 export const defaultEnrollment = {
   id: null,
   classId: null,
   userId: null,
+  lastUpdatedAt: null,
+  createdAt: null,
+  lastUpdatedBy: null,
+  createdBy: null,
 };
 
 // commonServices
