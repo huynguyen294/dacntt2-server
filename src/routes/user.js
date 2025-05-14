@@ -5,7 +5,7 @@ import {
   forgotPassword,
   resetPassword,
   verifyResetPasswordCode,
-  compareUserPassword,
+  comparePassword,
   signUp,
   getAllUsers,
   getUserById,
@@ -22,7 +22,7 @@ const userRoute = express.Router();
 
 userRoute.post("/sign-up", signUp);
 userRoute.get("/check-email/:email", checkUserByEMail);
-userRoute.post("/compare-password", compareUserPassword);
+userRoute.post("/:id/compare-password", comparePassword);
 userRoute.get("/forgot-password/:email", forgotPassword);
 userRoute.patch("/reset-password/:email", resetPassword);
 userRoute.get("/verify-reset-password-code/:email/:code", verifyResetPasswordCode);

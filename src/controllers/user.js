@@ -1,7 +1,6 @@
-import { classModel, employeeModel, userModel } from "../models/index.js";
+import { employeeModel, userModel } from "../models/index.js";
 import { arrayToObject, transformQueryToFilterObject } from "../utils/index.js";
 import { EMPLOYEE_ROLES } from "../constants/index.js";
-import groupBy from "lodash/groupBy.js";
 import bcrypt from "bcryptjs";
 
 const allowedUpdateUser = ["admin"];
@@ -236,6 +235,8 @@ export const updateUserWithRole = async (req, res, next) => {
 //[PATCH] /users/:id
 export const updateUser = async (req, res, next) => {
   const { id } = req.params;
+  const { resetPassword } = req.query;
+
   try {
     if (!allowedUpdateUser.includes(req.userRole) && req.userId != id) {
       res.status(403).json({ message: "Quyền truy cập bị từ chối" });
@@ -243,11 +244,21 @@ export const updateUser = async (req, res, next) => {
     }
 
     // remove password, role, oid
-    const { password, role, id: oid, ...data } = req.body;
+    const { password, oldPassword, role, id: oid, ...data } = req.body;
 
-    if (allowedUpdateUser.includes(req.userRole)) {
+    if (allowedUpdateUser.includes(req.userRole) && resetPassword !== "true") {
       data.role = role;
-      if (password) data.password = await bcrypt.hash(data.password, 12);
+      if (password) data.password = await bcrypt.hash(password, 12);
+    }
+
+    if (resetPassword === "true") {
+      const oldUser = await userModel.findById(id);
+      if (oldUser.password) {
+        const isPasswordCorrect = await bcrypt.compare(oldPassword, oldUser.password);
+        if (!isPasswordCorrect) return res.status(400).json({ message: "Mật khẩu không chính xác." });
+      }
+
+      data.password = await bcrypt.hash(password, 12);
     }
 
     data.last_updated_at = new Date();
@@ -281,8 +292,23 @@ export const checkUserByEMail = async (req, res, next) => {
   }
 };
 
-//[POST] /users/compare-password
-export const compareUserPassword = async (req, res, next) => {};
+//[POST] /users/:id/compare-password
+export const comparePassword = async (req, res, next) => {
+  const { id } = req.params;
+  const { password } = req.body;
+
+  try {
+    const oldUser = await userModel.findById(id);
+    if (oldUser.password) {
+      const isPasswordCorrect = await bcrypt.compare(password, oldUser.password);
+      if (!isPasswordCorrect) return res.status(400).json({ message: "Mật khẩu không chính xác." });
+    }
+
+    return res.status(200).json({ message: "Mật khẩu chính xác." });
+  } catch (error) {
+    next(error);
+  }
+};
 
 //[GET] /users/forgot-password/:email
 export const forgotPassword = async (req, res, next) => {};

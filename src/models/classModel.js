@@ -1,5 +1,5 @@
 import { ORDER, PAGER } from "../constants/index.js";
-import { generateCommonServices } from "./utils.js";
+import { generateCommonServices, keyConvertWrapper } from "./utils.js";
 
 export const defaultClass = {
   id: null,
@@ -22,6 +22,7 @@ export const defaultClass = {
 // commonServices
 const commonServices = generateCommonServices("classes");
 
+// other services
 const getFields = (type) => {
   switch (type) {
     case "full":
@@ -32,6 +33,8 @@ const getFields = (type) => {
       return [];
   }
 };
+
+const findUserClasses = keyConvertWrapper(async () => {});
 
 // model
 const classModel = {
@@ -47,6 +50,7 @@ const classModel = {
     return commonServices.exists(filter);
   },
   getFields,
+  findUserClasses,
 };
 
 export default classModel;

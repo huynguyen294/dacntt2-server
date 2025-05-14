@@ -19,14 +19,29 @@ export const generateCRUD = (model, isJunctionTable = false) => {
     create: async (req, res, next) => {
       try {
         const data = req.body;
-        if (!isJunctionTable) {
-          data.created_by = req.userId;
-          data.last_updated_at = new Date();
-          data.last_updated_by = req.userId;
+
+        if (!Array.isArray(data[model.tableName])) {
+          if (!isJunctionTable) {
+            data.created_by = req.userId;
+            data.last_updated_at = new Date();
+            data.last_updated_by = req.userId;
+          }
+
+          const created = await model.create(data);
+          return res.status(201).json({ created });
         }
 
-        const created = await model.create(data);
-        res.status(201).json({ created });
+        let transformed = data[model.tableName].map((d) => {
+          if (!isJunctionTable) {
+            d.created_by = req.userId;
+            d.last_updated_at = new Date();
+            d.last_updated_by = req.userId;
+          }
+          return d;
+        });
+
+        const created = await model.createMany(transformed);
+        return res.status(201).json({ created });
       } catch (error) {
         next(error);
       }

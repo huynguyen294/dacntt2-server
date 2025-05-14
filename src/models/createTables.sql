@@ -195,19 +195,11 @@ CREATE INDEX IF NOT EXISTS idx_classes_name_trgm ON classes USING GIN (name gin_
 -- create table enrollments if not exits;
 CREATE TABLE IF NOT EXISTS enrollments (
     id SERIAL PRIMARY KEY,
-    status VARCHAR(255) NOT NULL,
-    last_updated_at TIMESTAMPTZ DEFAULT NOW(),
-    created_at TIMESTAMPTZ DEFAULT NOW(),
     user_id INT REFERENCES users(id) ON DELETE
     SET NULL,
         class_id INT REFERENCES classes(id) ON DELETE
-    SET NULL,
-        last_updated_by INT REFERENCES users(id) ON DELETE
-    SET NULL,
-        created_by INT REFERENCES users(id) ON DELETE
     SET NULL
 );
-CREATE INDEX IF NOT EXISTS status ON enrollments (status);
 CREATE INDEX IF NOT EXISTS idx_enrollments_class_id ON enrollments (class_id);
 CREATE INDEX IF NOT EXISTS idx_enrollments_user_id ON enrollments (user_id);
 --;
@@ -230,13 +222,7 @@ CREATE INDEX IF NOT EXISTS idx_exams_name_trgm ON exams USING GIN (name gin_trgm
 -- create table student_exam if not exits;
 CREATE TABLE IF NOT EXISTS student_exam (
     id SERIAL PRIMARY KEY,
-    last_updated_at TIMESTAMPTZ DEFAULT NOW(),
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    last_updated_by INT REFERENCES users(id) ON DELETE
-    SET NULL,
-        created_by INT REFERENCES users(id) ON DELETE
-    SET NULL,
-        exam_id INT REFERENCES exams(id) ON DELETE
+    exam_id INT REFERENCES exams(id) ON DELETE
     SET NULL,
         student_id INT REFERENCES users(id) ON DELETE
     SET NULL

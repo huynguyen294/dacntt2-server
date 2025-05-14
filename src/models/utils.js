@@ -1,10 +1,11 @@
 import pgDB from "../configs/db.js";
+import camelCase from "lodash/camelCase.js";
 import { ORDER } from "../constants/index.js";
 import { convertToCamelShallow, convertToSnakeShallow } from "../utils/index.js";
 
 export const generateCommonServices = (tableName) => {
   return {
-    tableName,
+    tableName: camelCase(tableName),
 
     create: keyConvertWrapper(async (data) => {
       const fields = Object.keys(data);
@@ -17,6 +18,33 @@ export const generateCommonServices = (tableName) => {
 
       const result = await pgDB.query(query, values);
       return result.rows[0];
+    }),
+
+    createMany: keyConvertWrapper(async (list = []) => {
+      const values = [];
+      const fields = list.reduce((acc, data) => {
+        Object.keys(data).forEach((field) => !acc.includes(field) && acc.push(field));
+        return acc;
+      }, []);
+
+      const valuesStr = list
+        .map((data) => {
+          const valuesStr = fields
+            .map((f) => {
+              values.push(data[f] || null);
+              return "$" + values.length;
+            })
+            .join(", ");
+          return `(${valuesStr})`;
+        })
+        .join(", ");
+
+      const fieldsStr = fields.join(", ");
+      const query = `INSERT INTO ${tableName} (${fieldsStr}) VALUES ${valuesStr} RETURNING *`;
+      console.log("createMany:", query, fields, values);
+
+      const result = await pgDB.query(query, values);
+      return result.rows;
     }),
 
     updateById: keyConvertWrapper(async (id, newData) => {

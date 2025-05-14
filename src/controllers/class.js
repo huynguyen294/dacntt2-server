@@ -4,17 +4,14 @@ import { generateCRUD } from "./utils.js";
 
 const commonCRUD = generateCRUD(classModel);
 
-// [GET] /classes
-const get = async (req, res, next) => {
+// [GET] /classes?refs=true
+const getClassWithRefs = async (req, res, next) => {
   try {
-    const { refs, refFields = "basic" } = req.query;
+    const { refs } = req.query;
+    if (refs !== "true") return next();
+
+    const { refFields = "basic" } = req.query;
     const filterObj = transformQueryToFilterObject(req.query);
-
-    if (refs !== "true") {
-      const [rows, pager] = await classModel.find(filterObj, req.pager, req.order);
-      return res.status(200).json({ rows, pager });
-    }
-
     const [rows, pager] = await classModel.find(filterObj, req.pager, req.order);
 
     const refData = {};
@@ -29,7 +26,6 @@ const get = async (req, res, next) => {
       [[], [], []]
     );
 
-    console.log(await shiftModel.getFields(refFields));
     const [[users], [shifts], [courses]] = await Promise.all([
       userModel.find({ id: userIds }, req.pager, null, userModel.getFields(refFields)),
       shiftModel.find({ id: shiftIds }, req.pager, null, shiftModel.getFields(refFields)),
@@ -46,6 +42,10 @@ const get = async (req, res, next) => {
   }
 };
 
-const classController = { ...commonCRUD, get };
+export const classMiddleWares = {
+  get: [getClassWithRefs],
+};
+
+const classController = commonCRUD;
 
 export default classController;
