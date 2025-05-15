@@ -1,4 +1,4 @@
-import { employeeModel, userModel } from "../models/index.js";
+import { classModel, employeeModel, userModel } from "../models/index.js";
 import { arrayToObject, transformQueryToFilterObject } from "../utils/index.js";
 import { EMPLOYEE_ROLES } from "../constants/index.js";
 import bcrypt from "bcryptjs";
@@ -206,7 +206,7 @@ export const updateUserWithRole = async (req, res, next) => {
 
     if (allowedUpdateUser.includes(req.userRole)) {
       userData.role = role;
-      if (password) userData.password = await bcrypt.hash(userData.password, 12);
+      if (password) userData.password = await bcrypt.hash(password, 12);
     }
 
     userData.last_updated_at = new Date();
@@ -318,3 +318,57 @@ export const verifyResetPasswordCode = async (req, res, next) => {};
 
 //[PATCH] /users/reset-password/:email
 export const resetPassword = async (req, res, next) => {};
+
+// [GET] /users/:id?refs=true
+const getUserByIdWithRefs = async (req, res, next) => {
+  const { refs } = req.query;
+  if (refs !== "true") return next();
+
+  const { id } = req.params;
+
+  try {
+    let user = await userModel.findById(id);
+    const role = user.role;
+
+    // get data
+    const promises = [null, null, null];
+    if (EMPLOYEE_ROLES.concat("teacher").includes(role)) {
+      promises[0] = employeeModel.findOne({ userId: id });
+    }
+
+    switch (role) {
+      case "student":
+        promises[1] = classModel.findUserClasses(id);
+        break;
+      case "teacher":
+        promises[2] = classModel.find({ teacherId: id }, null, null);
+        break;
+    }
+
+    const [employee, studentClasses, teacherClasses] = await Promise.all(promises);
+
+    // merge data
+    const refs = {};
+    if (EMPLOYEE_ROLES.concat("teacher").includes(role)) {
+      const { id: employeeId, userId, ...employeeData } = employee || {};
+      user = { ...user, ...employeeData, employeeId };
+    }
+
+    switch (role) {
+      case "student":
+        refs.userClasses = studentClasses[0];
+        break;
+      case "teacher":
+        refs.userClasses = teacherClasses[0];
+        break;
+    }
+
+    res.status(200).json({ user, refs });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const userMiddlewares = {
+  getById: [getUserByIdWithRefs],
+};

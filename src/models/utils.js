@@ -98,7 +98,6 @@ export const generateCommonServices = (tableName) => {
 
       console.log("findOne:", finalQuery);
       const result = await pgDB.query(finalQuery, values);
-      console.log(result.rows[0]);
       return result.rows[0] ?? null;
     }),
 
@@ -136,7 +135,7 @@ export const generateCommonServices = (tableName) => {
 };
 
 export const generateFieldsStr = (fields, shortName) => {
-  if (!fields?.length) return "*";
+  if (!fields?.length) return shortName ? `${shortName}.*` : "*";
   if (!shortName) return fields.join(", ");
   return fields.map((f) => shortName + "." + f).join(", ");
 };

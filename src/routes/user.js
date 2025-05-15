@@ -15,6 +15,7 @@ import {
   updateUserWithRole,
   getUserByIdWithRole,
   getUsersWithRole,
+  userMiddlewares,
 } from "../controllers/user.js";
 import { auth, roles } from "../middlewares/index.js";
 
@@ -30,7 +31,7 @@ userRoute.get("/with-role/:role", auth, roles(["admin"]), getUsersWithRole);
 userRoute.post("/:role", auth, createUserWithRole);
 userRoute.post("/", auth, createUser);
 userRoute.get("/:role/:id", auth, getUserByIdWithRole);
-userRoute.get("/:id", auth, getUserById);
+userRoute.get("/:id", auth, ...userMiddlewares.getById, getUserById);
 userRoute.patch("/:role/:id", auth, updateUserWithRole);
 userRoute.patch("/:id", auth, updateUser);
 userRoute.delete("/:id", auth, deleteUserById);

@@ -1,5 +1,6 @@
+import pgDB from "../configs/db.js";
 import { ORDER, PAGER } from "../constants/index.js";
-import { generateCommonServices, keyConvertWrapper } from "./utils.js";
+import { generateCommonServices, generateFieldsStr, keyConvertWrapper } from "./utils.js";
 
 export const defaultClass = {
   id: null,
@@ -34,7 +35,22 @@ const getFields = (type) => {
   }
 };
 
-const findUserClasses = keyConvertWrapper(async () => {});
+const findUserClasses = keyConvertWrapper(async (userId, fields = []) => {
+  const fieldsStr = generateFieldsStr(fields, "c");
+
+  const query = `
+  SELECT ${fieldsStr}, e.id as enrollment_id
+  FROM enrollments e 
+  JOIN classes c ON e.class_id = c.id 
+  WHERE e.student_id = $1
+  `;
+
+  const values = [userId];
+
+  console.log("findOne:", query);
+  const result = await pgDB.query(query, values);
+  return result.rows;
+});
 
 // model
 const classModel = {
