@@ -1,7 +1,7 @@
 import express from "express";
 import { auth, roles } from "../middlewares/index.js";
 import { generateCRUDRoutes } from "./utils.js";
-import certificateController from "../controllers/certificate.js";
+import { certificateController } from "../controllers/index.js";
 
 const examRoute = express.Router();
 

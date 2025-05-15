@@ -1,8 +1,6 @@
+import { auth, roles } from "../middlewares/index.js";
 import { classModel, courseModel, shiftModel, userModel } from "../models/index.js";
 import { arrayToObject, transformQueryToFilterObject } from "../utils/index.js";
-import { generateCRUD } from "./utils.js";
-
-const commonCRUD = generateCRUD(classModel);
 
 // [GET] /classes?refs=true
 const getClassWithRefs = async (req, res, next) => {
@@ -10,7 +8,7 @@ const getClassWithRefs = async (req, res, next) => {
     const { refs } = req.query;
     if (refs !== "true") return next();
 
-    const { refFields = "basic" } = req.query;
+    const { refFields = ":basic" } = req.query;
     const filterObj = transformQueryToFilterObject(req.query);
     const [rows, pager] = await classModel.find(filterObj, req.pager, req.order);
 
@@ -43,9 +41,9 @@ const getClassWithRefs = async (req, res, next) => {
 };
 
 export const classMiddleWares = {
-  get: [getClassWithRefs],
+  get: [auth, roles(["admin", "finance-officer"]), getClassWithRefs],
+  create: [auth, roles(["admin", "finance-officer"])],
+  delete: [auth, roles(["admin", "finance-officer"])],
+  update: [auth, roles(["admin", "finance-officer"])],
+  getById: [auth, roles(["admin", "finance-officer"])],
 };
-
-const classController = commonCRUD;
-
-export default classController;

@@ -61,3 +61,12 @@ export const signIn = async (req, res, next) => {
 
 //[POST] /auth/google-sign-in
 export const googleSignIn = async (req, res, next) => {};
+
+const authController = {
+  generateNewAccessToken,
+  signOut,
+  signIn,
+  googleSignIn,
+};
+
+export default authController;

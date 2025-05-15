@@ -1,7 +1,7 @@
 import cloudinary from "../configs/cloudinary.js";
 
 //[POST] /images
-export const createImage = async (req, res, next) => {
+const createImage = async (req, res, next) => {
   const { base64, folder = null } = req.body;
 
   try {
@@ -15,7 +15,7 @@ export const createImage = async (req, res, next) => {
 };
 
 //[PATCH] /images/:folder/:id
-export const updateImage = async (req, res, next) => {
+const updateImage = async (req, res, next) => {
   const { folder, id } = req.params;
   const { base64 } = req.body;
 
@@ -30,7 +30,7 @@ export const updateImage = async (req, res, next) => {
 };
 
 //[DELETE] /images/:folder/:id
-export const deleteImage = async (req, res, next) => {
+const deleteImage = async (req, res, next) => {
   const { folder, id } = req.params;
 
   try {
@@ -40,3 +40,11 @@ export const deleteImage = async (req, res, next) => {
     next(error);
   }
 };
+
+const imageController = {
+  create: createImage,
+  update: updateImage,
+  delete: deleteImage,
+};
+
+export default imageController;

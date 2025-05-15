@@ -26,9 +26,9 @@ const commonServices = generateCommonServices("student_consultation");
 // other services
 const getFields = (type) => {
   switch (type) {
-    case "basic":
+    case ":basic":
       return ["id", "name", "email"];
-    case "full":
+    case ":full":
     default:
       return [];
   }

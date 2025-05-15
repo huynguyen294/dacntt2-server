@@ -20,4 +20,5 @@ export const generateCRUDRoutes = (router, controller = defaultController, optio
   router.get("/:id", ...getByIdMiddlewares, controller.getById);
   router.patch("/:id", ...updateMiddlewares, controller.update);
   router.delete("/:id", ...deleteMiddlewares, controller.delete);
+  router.delete("/", ...deleteMiddlewares, controller.delete);
 };

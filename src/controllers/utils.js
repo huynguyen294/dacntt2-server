@@ -1,12 +1,12 @@
 import cloudinary from "../configs/cloudinary.js";
 import { transformQueryToFilterObject } from "../utils/index.js";
 
-export const generateCRUD = (model, isJunctionTable = false) => {
+export const generateCRUD = (model, { isJunctionTable = false, searchFields = ["name"] } = {}) => {
   return {
     // [GET] ${model.tableName}/
     get: async (req, res, next) => {
       try {
-        const filterObj = transformQueryToFilterObject(req.query, ["name"]);
+        const filterObj = transformQueryToFilterObject(req.query, searchFields);
 
         const [rows, pager] = await model.find(filterObj, req.pager, req.order);
         res.status(200).json({ rows, pager });
@@ -19,7 +19,6 @@ export const generateCRUD = (model, isJunctionTable = false) => {
     create: async (req, res, next) => {
       try {
         const data = req.body;
-
         if (!Array.isArray(data[model.tableName])) {
           if (!isJunctionTable) {
             data.created_by = req.userId;
@@ -80,11 +79,17 @@ export const generateCRUD = (model, isJunctionTable = false) => {
 
     // [DELETE] ${model.tableName}/:id
     delete: async (req, res, next) => {
-      const { id } = req.params;
-
       try {
-        await model.delete(id);
-        res.status(201).json({ message: "Xóa ca học thành công!" });
+        const { id } = req.params;
+        const { ids } = req.query;
+
+        if (id) {
+          await model.delete(id);
+          return res.status(201).json({ message: "Xóa thành công!" });
+        }
+
+        await model.deleteMany(ids.split(","));
+        return res.status(201).json({ message: "Xóa thành công!" });
       } catch (error) {
         next(error);
       }

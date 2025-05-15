@@ -1,13 +1,21 @@
 import express from "express";
-import { createCourse, deleteCourse, getCourseById, getCourses, updateCourse } from "../controllers/course.js";
 import { auth, roles } from "../middlewares/index.js";
+import { generateCRUDRoutes } from "./utils.js";
+import { courseController } from "../controllers/index.js";
 
 const courseRoute = express.Router();
 
-courseRoute.get("/", auth, roles(["admin", "teacher"]), getCourses);
-courseRoute.post("/", auth, roles(["admin", "teacher"]), createCourse);
-courseRoute.get("/:id", auth, roles(["admin", "teacher"]), getCourseById);
-courseRoute.patch("/:id", auth, roles(["admin", "teacher"]), updateCourse);
-courseRoute.delete("/:id", auth, roles(["admin", "teacher"]), deleteCourse);
+// CRUD
+const commonMiddlewares = [auth, roles(["admin"])];
+generateCRUDRoutes(courseRoute, courseController, {
+  middlewares: {
+    get: commonMiddlewares,
+    create: commonMiddlewares,
+    getById: commonMiddlewares,
+    update: commonMiddlewares,
+    delete: commonMiddlewares,
+  },
+});
+// others
 
 export default courseRoute;

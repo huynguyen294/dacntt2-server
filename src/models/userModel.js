@@ -34,7 +34,7 @@ const commonServices = generateCommonServices("users");
 
 // other services
 const findEmployee = keyConvertWrapper(
-  async (filter = { ...defaultUser, ...defaultEmployee }, pager = PAGER, order = ORDER) => {
+  async (filter = { ...defaultUser, ...defaultEmployee }, pager = PAGER, order = ORDER, employeeFields = []) => {
     const defaultUserConverted = convertToSnakeShallow(defaultUser);
     const defaultEmployeeConverted = convertToSnakeShallow(defaultEmployee);
 
@@ -46,12 +46,13 @@ const findEmployee = keyConvertWrapper(
 
     const orderShortName = defaultUserConverted.hasOwnProperty(order.order_by) ? "u" : "e";
     const orderStr = generateOrderStr(order, orderShortName);
-    const { id, user_id, ...employeeFields } = defaultEmployeeConverted;
-    const fieldsStr =
-      `u.*, e.id AS employee_id, ` +
-      Object.keys(employeeFields)
-        .map((key) => "e." + key)
-        .join(", ");
+    const { id, user_id, ...employee } = defaultEmployeeConverted;
+    const filteredFields =
+      employeeFields.length > 0
+        ? Object.keys(employee).filter((f) => employeeFields.includes(f))
+        : Object.keys(employee);
+
+    const fieldsStr = `u.*, e.id AS employee_id, ` + filteredFields.map((key) => "e." + key).join(", ");
 
     const query = `SELECT ${fieldsStr} FROM users u LEFT JOIN employees e ON u.id = e.user_id`;
     const { filterStr, values } = generateFilterString(filterMerged, pager);
@@ -69,14 +70,13 @@ const findEmployee = keyConvertWrapper(
   }
 );
 
-const findEmployeeById = keyConvertWrapper(async (id) => {
-  const { id: employeeId, user_id, ...employeeFields } = convertToSnakeShallow(defaultEmployee);
-  const fieldsStr =
-    `u.*, e.id AS employee_id, ` +
-    Object.keys(employeeFields)
-      .map((key) => "e." + key)
-      .join(", ");
+const findEmployeeById = keyConvertWrapper(async (id, employeeFields) => {
+  const { id: employeeId, user_id, ...employee } = convertToSnakeShallow(defaultEmployee);
 
+  const filteredFields =
+    employeeFields.length > 0 ? Object.keys(employee).filter((f) => employeeFields.includes(f)) : Object.keys(employee);
+
+  const fieldsStr = `u.*, e.id AS employee_id, ` + filteredFields.map((key) => "e." + key).join(", ");
   const query = `SELECT ${fieldsStr} FROM users u LEFT JOIN employees e ON u.id = e.user_id WHERE u.id = $1`;
   const values = [id];
 
@@ -87,9 +87,9 @@ const findEmployeeById = keyConvertWrapper(async (id) => {
 
 const getFields = (type) => {
   switch (type) {
-    case "full":
+    case ":full":
       return [];
-    case "basic":
+    case ":basic":
       return ["id", "name", "email", "role"];
     default:
       return [];

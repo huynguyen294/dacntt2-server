@@ -1,40 +1,17 @@
 import express from "express";
-import {
-  checkUserByEMail,
-  updateUser,
-  forgotPassword,
-  resetPassword,
-  verifyResetPasswordCode,
-  comparePassword,
-  signUp,
-  getAllUsers,
-  getUserById,
-  createUser,
-  deleteUserById,
-  createUserWithRole,
-  updateUserWithRole,
-  getUserByIdWithRole,
-  getUsersWithRole,
-  userMiddlewares,
-} from "../controllers/user.js";
-import { auth, roles } from "../middlewares/index.js";
+import { userController } from "../controllers/index.js";
+import { generateCRUDRoutes } from "./utils.js";
+import { userMiddlewares } from "../controllers/user.js";
 
 const userRoute = express.Router();
 
-userRoute.post("/sign-up", signUp);
-userRoute.get("/check-email/:email", checkUserByEMail);
-userRoute.post("/:id/compare-password", comparePassword);
-userRoute.get("/forgot-password/:email", forgotPassword);
-userRoute.patch("/reset-password/:email", resetPassword);
-userRoute.get("/verify-reset-password-code/:email/:code", verifyResetPasswordCode);
-userRoute.get("/with-role/:role", auth, roles(["admin"]), getUsersWithRole);
-userRoute.post("/:role", auth, createUserWithRole);
-userRoute.post("/", auth, createUser);
-userRoute.get("/:role/:id", auth, getUserByIdWithRole);
-userRoute.get("/:id", auth, ...userMiddlewares.getById, getUserById);
-userRoute.patch("/:role/:id", auth, updateUserWithRole);
-userRoute.patch("/:id", auth, updateUser);
-userRoute.delete("/:id", auth, deleteUserById);
-userRoute.get("/", auth, roles(["admin"]), getAllUsers);
+userRoute.post("/sign-up", userController.signUp);
+userRoute.get("/check-email/:email", userController.checkUserByEMail);
+userRoute.post("/:id/compare-password", userController.comparePassword);
+userRoute.get("/forgot-password/:email", userController.forgotPassword);
+userRoute.patch("/reset-password/:email", userController.resetPassword);
+userRoute.get("/verify-reset-password-code/:email/:code", userController.verifyResetPasswordCode);
+// crud
+generateCRUDRoutes(userRoute, userController, { middlewares: userMiddlewares });
 
 export default userRoute;

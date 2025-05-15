@@ -1,8 +1,8 @@
 import express from "express";
-import enrollmentModel from "../controllers/enrollment.js";
+import { enrollmentController } from "../controllers/index.js";
 import { generateCRUDRoutes } from "./utils.js";
 
 const enrollmentRoute = express.Router();
-generateCRUDRoutes(enrollmentRoute, enrollmentModel);
+generateCRUDRoutes(enrollmentRoute, enrollmentController);
 
 export default enrollmentRoute;

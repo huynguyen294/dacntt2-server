@@ -70,6 +70,15 @@ export const generateCommonServices = (tableName) => {
       return result.rows[0];
     }),
 
+    deleteMany: keyConvertWrapper(async (listId = []) => {
+      const query = `DELETE FROM ${tableName} WHERE id = ANY($1) RETURNING *`;
+      const values = [listId];
+      console.log("delete:", query);
+
+      const result = await pgDB.query(query, values);
+      return result.rows[0];
+    }),
+
     find: keyConvertWrapper(async (filter = {}, pager, order, fields) => {
       const [pagerGenerated, pagerStr] = await generatePager(tableName, filter, pager);
       const orderStr = generateOrderStr(order);
@@ -250,6 +259,7 @@ const MAP_OPERATORS = {
   like: "LIKE",
   ilike: "ILIKE",
   any: "ANY",
+  in: "ANY",
   isNull: "IS NULL",
   // isNull: "IS NULL",
   // isNotNull: "IS NOT NULL",

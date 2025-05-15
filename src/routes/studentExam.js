@@ -1,5 +1,5 @@
 import express from "express";
-import studentExamController from "../controllers/studentExam.js";
+import { studentExamController } from "../controllers/index.js";
 import { generateCRUDRoutes } from "./utils.js";
 
 const studentExamRoute = express.Router();

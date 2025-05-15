@@ -1,12 +1,12 @@
 import express from "express";
-import { signIn, googleSignIn, generateNewAccessToken, signOut } from "../controllers/auth.js";
+import authController from "../controllers/auth.js";
 import { auth } from "../middlewares/index.js";
 
 const authRoute = express.Router();
 
-authRoute.post("/sign-in", signIn);
-authRoute.post("/google-sign-in", googleSignIn);
-authRoute.get("/sign-out", auth, signOut);
-authRoute.get("/new-access-token", generateNewAccessToken);
+authRoute.post("/sign-in", authController.signIn);
+authRoute.post("/google-sign-in", authController.googleSignIn);
+authRoute.get("/sign-out", auth, authController.signOut);
+authRoute.get("/new-access-token", authController.generateNewAccessToken);
 
 export default authRoute;
