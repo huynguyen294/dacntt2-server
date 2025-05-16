@@ -231,8 +231,6 @@ const getUsersWithRole = async (req, res, next) => {
         classModel.getFields(refFields)
       );
 
-      console.log(studentClasses);
-
       refs.userClasses = groupBy(studentClasses, "studentId");
 
       return res.status(200).json({ rows, pager, refs });

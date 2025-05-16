@@ -25,9 +25,9 @@ const getClassWithRefs = async (req, res, next) => {
     );
 
     const [[users], [shifts], [courses]] = await Promise.all([
-      userModel.find({ id: userIds }, req.pager, null, userModel.getFields(refFields)),
-      shiftModel.find({ id: shiftIds }, req.pager, null, shiftModel.getFields(refFields)),
-      courseModel.find({ id: courseIds }, req.pager, null, courseModel.getFields(refFields)),
+      userModel.find({ id: { in: userIds } }, req.pager, null, userModel.getFields(refFields)),
+      shiftModel.find({ id: { in: shiftIds } }, req.pager, null, shiftModel.getFields(refFields)),
+      courseModel.find({ id: { in: courseIds } }, req.pager, null, courseModel.getFields(refFields)),
     ]);
 
     refData.users = arrayToObject(users, "id");
