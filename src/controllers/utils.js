@@ -1,5 +1,5 @@
 import cloudinary from "../configs/cloudinary.js";
-import { transformQueryToFilterObject } from "../utils/index.js";
+import { transformFields, transformQueryToFilterObject } from "../utils/index.js";
 
 export const generateCRUD = (model, { isJunctionTable = false, searchFields = ["name"] } = {}) => {
   return {
@@ -7,8 +7,9 @@ export const generateCRUD = (model, { isJunctionTable = false, searchFields = ["
     get: async (req, res, next) => {
       try {
         const filterObj = transformQueryToFilterObject(req.query, searchFields);
+        const fields = model.getFields ? model.getFields(req.query.fields) : transformFields(req.query.fields);
 
-        const [rows, pager] = await model.find(filterObj, req.pager, req.order);
+        const [rows, pager] = await model.find(filterObj, req.pager, req.order, fields);
         res.status(200).json({ rows, pager });
       } catch (error) {
         next(error);

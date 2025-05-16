@@ -1,4 +1,5 @@
 import { ORDER, PAGER } from "../constants/index.js";
+import { transformFields } from "../utils/index.js";
 import { generateCommonServices } from "./utils.js";
 
 export const defaultCourse = {
@@ -17,16 +18,6 @@ export const defaultCourse = {
 const commonServices = generateCommonServices("courses");
 
 // other services
-const getFields = (type) => {
-  switch (type) {
-    case ":full":
-      return [];
-    case ":basic":
-      return ["id", "name"];
-    default:
-      return [];
-  }
-};
 
 // model
 const courseModel = {
@@ -41,7 +32,7 @@ const courseModel = {
   exists: async (filter = defaultEmployee) => {
     return commonServices.exists(filter);
   },
-  getFields,
+  getFields: transformFields,
 };
 
 export default courseModel;

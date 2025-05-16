@@ -1,4 +1,5 @@
 import { ORDER, PAGER } from "../constants/index.js";
+import { transformFields } from "../utils/index.js";
 import { defaultEmployee } from "./employeeModel.js";
 import { generateCommonServices } from "./utils.js";
 
@@ -24,15 +25,7 @@ export const defaultStudentConsultation = {
 const commonServices = generateCommonServices("student_consultation");
 
 // other services
-const getFields = (type) => {
-  switch (type) {
-    case ":basic":
-      return ["id", "name", "email"];
-    case ":full":
-    default:
-      return [];
-  }
-};
+const getFields = (type) => transformFields(type, { basicFields: ["id", "name", "email"] });
 
 // model
 const studentConsultationModel = {

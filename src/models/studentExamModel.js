@@ -1,4 +1,5 @@
 import { ORDER, PAGER } from "../constants/index.js";
+import { transformFields } from "../utils/index.js";
 import { generateCommonServices } from "./utils.js";
 
 // assign student into exam
@@ -31,6 +32,7 @@ const studentExamModel = {
   exists: async (filter = defaultEmployee) => {
     return commonServices.exists(filter);
   },
+  getFields: transformFields,
 };
 
 export default studentExamModel;

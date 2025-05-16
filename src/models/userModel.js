@@ -1,6 +1,6 @@
 import pgDB from "../configs/db.js";
 import { ORDER, PAGER } from "../constants/index.js";
-import { convertToSnakeShallow } from "../utils/index.js";
+import { convertToSnakeShallow, transformFields } from "../utils/index.js";
 import { defaultEmployee } from "./employeeModel.js";
 import {
   filterPropertyByDefaultObject,
@@ -85,16 +85,7 @@ const findEmployeeById = keyConvertWrapper(async (id, employeeFields) => {
   return result.rows[0] ?? null;
 });
 
-const getFields = (type) => {
-  switch (type) {
-    case ":full":
-      return [];
-    case ":basic":
-      return ["id", "name", "email", "role"];
-    default:
-      return [];
-  }
-};
+const getFields = (type) => transformFields(type, { basicFields: ["id", "name", "email", "role"] });
 
 // model
 const userModel = {

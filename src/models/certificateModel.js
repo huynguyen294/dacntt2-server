@@ -1,4 +1,5 @@
 import { ORDER, PAGER } from "../constants/index.js";
+import { transformFields } from "../utils/index.js";
 import { generateCommonServices } from "./utils.js";
 
 export const defaultCertificate = {
@@ -32,6 +33,7 @@ const certificateModel = {
   exists: async (filter = defaultEmployee) => {
     return commonServices.exists(filter);
   },
+  getFields: transformFields,
 };
 
 export default certificateModel;

@@ -4,14 +4,14 @@ import camelCase from "lodash/camelCase.js";
 
 export const convertToSnakeShallow = (value) => {
   if (!value) return null;
-  if (typeof value !== "object") return value;
+  if (typeof value !== "object") return snakeCase(value);
   if (Array.isArray(value)) return value.map((v) => convertToSnakeShallow(v));
   return mapKeys(value, (_, key) => snakeCase(key));
 };
 
 export const convertToCamelShallow = (value) => {
   if (!value) return null;
-  if (typeof value !== "object") return value;
+  if (typeof value !== "object") return camelCase(value);
   if (Array.isArray(value)) return value.map((v) => convertToCamelShallow(v));
   return mapKeys(value, (_, key) => camelCase(key));
 };
@@ -21,7 +21,7 @@ export const transformQueryToFilterObject = (query, searchFields = ["name"]) => 
 
   const filterObj = {};
   if (searchQuery) {
-    filterObj.search = searchFields.map((f) => ({ [f]: `%${searchQuery}%` }));
+    filterObj.search = searchFields.map((f) => ({ [snakeCase(f)]: `%${searchQuery}%` }));
   }
 
   if (filter) {
@@ -40,6 +40,21 @@ export const transformQueryToFilterObject = (query, searchFields = ["name"]) => 
   }
 
   return filterObj;
+};
+const defaultTransformFieldsOptions = { basicFields: ["id", "name"] };
+export const transformFields = (queryField, options = defaultTransformFieldsOptions) => {
+  if (!queryField) return [];
+
+  const splitted = queryField.split(",");
+  if (splitted.length > 1) return convertToSnakeShallow(splitted);
+
+  switch (queryField) {
+    case ":basic":
+      return convertToSnakeShallow(options.basicFields);
+    case ":full":
+    default:
+      return [];
+  }
 };
 
 export const arrayToObject = (arr = [], property = "id") => {

@@ -1,5 +1,6 @@
 import pgDB from "../configs/db.js";
 import { ORDER, PAGER } from "../constants/index.js";
+import { transformFields } from "../utils/index.js";
 import { generateCommonServices, generateFieldsStr, generateOrderStr, keyConvertWrapper } from "./utils.js";
 
 export const defaultClass = {
@@ -24,16 +25,7 @@ export const defaultClass = {
 const commonServices = generateCommonServices("classes");
 
 // other services
-const getFields = (type) => {
-  switch (type) {
-    case ":full":
-      return [];
-    case ":basic":
-      return ["id", "name", "teacher_id"];
-    default:
-      return [];
-  }
-};
+const getFields = (type) => transformFields(type, { basicFields: ["id", "name", "teacher_id"] });
 
 const findUserClasses = keyConvertWrapper(async (userIds, pager = null, order = ORDER, fields = []) => {
   const fieldsStr = generateFieldsStr(fields, "c");

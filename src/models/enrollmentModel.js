@@ -1,4 +1,5 @@
 import { ORDER, PAGER } from "../constants/index.js";
+import { transformFields } from "../utils/index.js";
 import { generateCommonServices } from "./utils.js";
 
 // assign student into class
@@ -17,6 +18,7 @@ export const defaultEnrollment = {
 const commonServices = generateCommonServices("enrollments");
 
 // other services
+const getFields = (queryField) => transformFields(queryField, { basicFields: ["id", "class_id", "user_id"] });
 
 // model
 const enrollmentModel = {
@@ -31,6 +33,7 @@ const enrollmentModel = {
   exists: async (filter = defaultEmployee) => {
     return commonServices.exists(filter);
   },
+  getFields,
 };
 
 export default enrollmentModel;

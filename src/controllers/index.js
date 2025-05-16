@@ -44,6 +44,6 @@ export const studentConsultationController = commonStudentConsultationCRUD;
 const commonStudentExamCRUD = generateCRUD(studentExamModel);
 export const studentExamController = commonStudentExamCRUD;
 
-// studentExam
-const commonUserCRUD = generateCRUD(userModel);
+// userModel
+const commonUserCRUD = generateCRUD(userModel, { searchFields: ["name", "email", "phoneNumber"] });
 export const userController = { ...commonUserCRUD, ...otherUserControllers };

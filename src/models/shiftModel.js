@@ -1,4 +1,5 @@
 import { ORDER, PAGER } from "../constants/index.js";
+import { transformFields } from "../utils/index.js";
 import { generateCommonServices } from "./utils.js";
 
 export const defaultShifts = {
@@ -16,16 +17,7 @@ export const defaultShifts = {
 const commonServices = generateCommonServices("shifts");
 
 // other services
-const getFields = (type) => {
-  switch (type) {
-    case ":full":
-      return [];
-    case ":basic":
-      return ["id", "name", "start_time", "end_time"];
-    default:
-      return [];
-  }
-};
+const getFields = (type) => transformFields(type, { basicFields: ["id", "name", "start_time", "end_time"] });
 
 // model
 const courseModel = {
