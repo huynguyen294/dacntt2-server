@@ -113,7 +113,9 @@ CREATE TABLE IF NOT EXISTS student_consultation (
     note TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     last_updated_at TIMESTAMPTZ DEFAULT NOW(),
-    consultant_id INT REFERENCES users(id) ON DELETE
+    student_id INT REFERENCES users(id) ON DELETE
+    SET NULL,
+        consultant_id INT REFERENCES users(id) ON DELETE
     SET NULL,
         expected_course_id INT REFERENCES courses(id) ON DELETE
     SET NULL,
@@ -126,6 +128,7 @@ CREATE TABLE IF NOT EXISTS student_consultation (
 );
 -- ;
 -- student_consultation indexes;
+CREATE INDEX IF NOT EXISTS idx_student_consultation_student_id ON student_consultation (student_id);
 CREATE INDEX IF NOT EXISTS idx_student_consultation_expected_course_id ON student_consultation (expected_course_id);
 CREATE INDEX IF NOT EXISTS idx_student_consultation_expected_class_id ON student_consultation (expected_class_id);
 CREATE INDEX IF NOT EXISTS idx_student_consultation_consultant_id ON student_consultation (consultant_id);
