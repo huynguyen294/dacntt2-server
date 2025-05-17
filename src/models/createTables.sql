@@ -207,7 +207,8 @@ CREATE TABLE IF NOT EXISTS enrollments (
         last_updated_by INT REFERENCES users(id) ON DELETE
     SET NULL,
         created_by INT REFERENCES users(id) ON DELETE
-    SET NULL
+    SET NULL,
+        UNIQUE ("student_id", "class_id")
 );
 CREATE INDEX IF NOT EXISTS idx_enrollments_class_id ON enrollments (class_id);
 CREATE INDEX IF NOT EXISTS idx_enrollments_student_id ON enrollments (student_id);

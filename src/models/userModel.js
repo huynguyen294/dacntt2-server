@@ -85,7 +85,7 @@ const findEmployeeById = keyConvertWrapper(async (id, employeeFields) => {
   return result.rows[0] ?? null;
 });
 
-const getFields = (type) => transformFields(type, { basicFields: ["id", "name", "email", "role"] });
+const getFields = (type) => transformFields(type, { basicFields: ["id", "name", "email", "role", "image_url"] });
 
 // model
 const userModel = {

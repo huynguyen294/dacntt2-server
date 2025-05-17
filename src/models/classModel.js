@@ -25,7 +25,7 @@ export const defaultClass = {
 const commonServices = generateCommonServices("classes");
 
 // other services
-const getFields = (type) => transformFields(type, { basicFields: ["id", "name", "teacher_id"] });
+const getFields = (type) => transformFields(type, { basicFields: ["id", "name", "teacher_id", "shift_id"] });
 
 const findUserClasses = keyConvertWrapper(async (userIds, pager = null, order = ORDER, fields = []) => {
   const fieldsStr = generateFieldsStr(fields, "c");
@@ -46,6 +46,25 @@ const findUserClasses = keyConvertWrapper(async (userIds, pager = null, order = 
   return result.rows;
 });
 
+const findStudents = keyConvertWrapper(async (classIds, pager = null, order = ORDER, userFields = []) => {
+  const fieldsStr = generateFieldsStr(userFields, "u");
+  const orderStr = generateOrderStr(order, "c");
+
+  const query = `
+  SELECT ${fieldsStr}, e.id as enrollment_id, e.class_id
+  FROM enrollments e
+  JOIN users u ON e.student_id = u.id 
+  WHERE e.class_id = ANY($1)
+  ${orderStr}
+  `;
+
+  const values = [classIds];
+
+  console.log("findStudents:", query, values);
+  const result = await pgDB.query(query, values);
+  return result.rows;
+});
+
 // model
 const classModel = {
   ...commonServices,
@@ -60,6 +79,7 @@ const classModel = {
     return commonServices.exists(filter);
   },
   getFields,
+  findStudents,
   findUserClasses,
 };
 

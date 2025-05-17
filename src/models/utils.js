@@ -20,12 +20,14 @@ export const generateCommonServices = (tableName) => {
       return result.rows[0];
     }),
 
-    createMany: keyConvertWrapper(async (list = []) => {
+    createMany: keyConvertWrapper(async (list = [], excepts = []) => {
       const values = [];
       const fields = list.reduce((acc, data) => {
         Object.keys(data).forEach((field) => !acc.includes(field) && acc.push(field));
         return acc;
       }, []);
+
+      const exceptsStr = excepts.length > 0 ? `ON CONFLICT (${excepts.join(",")}) DO NOTHING` : "";
 
       const valuesStr = list
         .map((data) => {
@@ -40,7 +42,7 @@ export const generateCommonServices = (tableName) => {
         .join(", ");
 
       const fieldsStr = fields.join(", ");
-      const query = `INSERT INTO ${tableName} (${fieldsStr}) VALUES ${valuesStr} RETURNING *`;
+      const query = `INSERT INTO ${tableName} (${fieldsStr}) VALUES ${valuesStr} ${exceptsStr} RETURNING *`;
       console.log("createMany:", query, fields, values);
 
       const result = await pgDB.query(query, values);

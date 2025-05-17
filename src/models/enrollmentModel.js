@@ -7,7 +7,7 @@ import { generateCommonServices } from "./utils.js";
 export const defaultEnrollment = {
   id: null,
   classId: null,
-  userId: null,
+  studentId: null,
   lastUpdatedAt: null,
   createdAt: null,
   lastUpdatedBy: null,
@@ -18,7 +18,7 @@ export const defaultEnrollment = {
 const commonServices = generateCommonServices("enrollments");
 
 // other services
-const getFields = (queryField) => transformFields(queryField, { basicFields: ["id", "class_id", "user_id"] });
+const getFields = (queryField) => transformFields(queryField, { basicFields: ["id", "class_id", "student_id"] });
 
 // model
 const enrollmentModel = {
