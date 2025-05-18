@@ -7,6 +7,7 @@ export const defaultCourse = {
   name: null,
   level: null,
   numberOfLessons: null,
+  numberOfStudents: null,
   status: null,
   lastUpdatedAt: null,
   createdAt: null,

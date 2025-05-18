@@ -41,19 +41,24 @@ export const transformQueryToFilterObject = (query, searchFields = ["name"]) => 
 
   return filterObj;
 };
-const defaultTransformFieldsOptions = { basicFields: ["id", "name"] };
-export const transformFields = (queryField, options = defaultTransformFieldsOptions) => {
-  if (!queryField) return [];
+const defaultTransformFieldsOptions = { basicFields: ["id", "name"], defaultObject: {} };
+export const transformFields = (queryField = "", options = defaultTransformFieldsOptions) => {
+  const {
+    basicFields = defaultTransformFieldsOptions.basicFields,
+    defaultObject = defaultTransformFieldsOptions.defaultObject,
+  } = options;
 
-  const splitted = queryField.split(",");
-  if (splitted.length > 1) return convertToSnakeShallow(splitted);
+  if (queryField) {
+    const splitted = queryField.split(",");
+    if (splitted.length > 1) return convertToSnakeShallow(splitted);
+  }
 
   switch (queryField) {
     case ":basic":
-      return convertToSnakeShallow(options.basicFields);
+      return convertToSnakeShallow(basicFields);
     case ":full":
     default:
-      return [];
+      return Object.keys(defaultObject);
   }
 };
 

@@ -29,6 +29,8 @@ export const defaultUser = {
   createdBy: null,
 };
 
+const { password, ...defaultObject } = defaultUser;
+
 // commonServices
 const commonServices = generateCommonServices("users");
 
@@ -52,7 +54,9 @@ const findEmployee = keyConvertWrapper(
         ? Object.keys(employee).filter((f) => employeeFields.includes(f))
         : Object.keys(employee);
 
-    const fieldsStr = `u.*, e.id AS employee_id, ` + filteredFields.map((key) => "e." + key).join(", ");
+    const { password, ...useFields } = defaultUserConverted;
+    const useFieldsStr = generateFieldsStr(Object.keys(useFields), "u");
+    const fieldsStr = `${useFieldsStr}, e.id AS employee_id, ` + filteredFields.map((key) => "e." + key).join(", ");
 
     const query = `SELECT ${fieldsStr} FROM users u LEFT JOIN employees e ON u.id = e.user_id`;
     const { filterStr, values } = generateFilterString(filterMerged, pager);
@@ -76,7 +80,9 @@ const findEmployeeById = keyConvertWrapper(async (id, employeeFields) => {
   const filteredFields =
     employeeFields.length > 0 ? Object.keys(employee).filter((f) => employeeFields.includes(f)) : Object.keys(employee);
 
-  const fieldsStr = `u.*, e.id AS employee_id, ` + filteredFields.map((key) => "e." + key).join(", ");
+  const { password, ...useFields } = defaultUserConverted;
+  const useFieldsStr = generateFieldsStr(Object.keys(useFields), "u");
+  const fieldsStr = `${useFieldsStr}, e.id AS employee_id, ` + filteredFields.map((key) => "e." + key).join(", ");
   const query = `SELECT ${fieldsStr} FROM users u LEFT JOIN employees e ON u.id = e.user_id WHERE u.id = $1`;
   const values = [id];
 
@@ -85,7 +91,8 @@ const findEmployeeById = keyConvertWrapper(async (id, employeeFields) => {
   return result.rows[0] ?? null;
 });
 
-const getFields = (type) => transformFields(type, { basicFields: ["id", "name", "email", "role", "image_url"] });
+const getFields = (type) =>
+  transformFields(type, { basicFields: ["id", "name", "email", "role", "image_url"], defaultObject });
 
 // model
 const userModel = {

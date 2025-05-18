@@ -223,7 +223,7 @@ const getUsersWithRole = async (req, res, next) => {
     }
 
     if (role === "student") {
-      const [rows, pager] = await userModel.find(filterObj, req.pager, req.order);
+      const [rows, pager] = await userModel.find(filterObj, req.pager, req.order, userModel.getFields(":full"));
       const studentClasses = await classModel.findUserClasses(
         rows.map((r) => r.id),
         null,

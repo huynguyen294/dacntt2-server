@@ -84,6 +84,7 @@ CREATE TABLE IF NOT EXISTS courses (
     description TEXT,
     level INT,
     number_of_lessons INT NOT NULL,
+    number_of_students INT NOT NULL,
     tuition_fee INT NOT NULL,
     status VARCHAR(255) NOT NULL,
     last_updated_at TIMESTAMPTZ DEFAULT NOW(),
