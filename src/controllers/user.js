@@ -26,11 +26,8 @@ const signUp = async (req, res, next) => {
   }
 };
 
-//[POST] /users?role=
-const createUserWithRole = async (req, res, next) => {
-  const paramRole = req.query.role;
-  if (!paramRole || paramRole === "admin" || paramRole === "_") return next();
-
+//[POST] /users
+const createUser = async (req, res, next) => {
   try {
     const { role, employmentType, certificates, major, startDate, salary, status, note, ...userData } = req.body;
     const employeeData = { employmentType, certificates, major, startDate, salary, status, note };
@@ -49,9 +46,11 @@ const createUserWithRole = async (req, res, next) => {
     const created = await userModel.create(userData);
 
     const refs = {};
-    employeeData.userId = created.id;
-    const newEmployee = await employeeModel.create(employeeData);
-    refs.userEmployees = { [created.id]: newEmployee };
+    if (EMPLOYEE_ROLES.includes(role)) {
+      employeeData.userId = created.id;
+      const newEmployee = await employeeModel.create(employeeData);
+      refs.userEmployees = { [created.id]: newEmployee };
+    }
 
     res.status(201).json({ created, refs });
   } catch (error) {
@@ -59,11 +58,9 @@ const createUserWithRole = async (req, res, next) => {
   }
 };
 
-//[PATCH] /users/:id?role=
-const updateUserWithRole = async (req, res, next) => {
-  const paramRole = req.query.role;
-  if (!paramRole || paramRole === "admin" || paramRole === "_") return next();
-
+//[PATCH] /users/:id
+const updateUser = async (req, res, next) => {
+  const { resetPassword } = req.query;
   const { id } = req.params;
   try {
     if (!allowedUpdateUser.includes(req.userRole) && req.userId != id) {
@@ -85,55 +82,14 @@ const updateUserWithRole = async (req, res, next) => {
       status,
       note,
       userId,
+      oldPassword,
       ...userData
     } = req.body;
     const employeeData = { employmentType, certificates, major, startDate, salary, status, note };
 
-    if (allowedUpdateUser.includes(req.userRole)) {
+    if (allowedUpdateUser.includes(req.userRole) && resetPassword !== "true") {
       userData.role = role;
       if (password) userData.password = await bcrypt.hash(password, 12);
-    }
-
-    userData.last_updated_at = new Date();
-    userData.last_updated_by = req.userId;
-    const updated = await userModel.updateById(id, userData);
-
-    const refs = {};
-    if (EMPLOYEE_ROLES.concat("teacher").includes(paramRole)) {
-      if (employeeId) {
-        employeeData.userId = userId || id;
-        const result = await employeeModel.updateById(employeeId, employeeData);
-        refs.userEmployees = { [id]: result };
-      } else {
-        employeeData.userId = id;
-        const result = await employeeModel.create(employeeData);
-        refs.userEmployees = { [id]: result };
-      }
-    }
-
-    res.status(201).json({ updated, refs });
-  } catch (error) {
-    next(error);
-  }
-};
-
-//[PATCH] /users/:id
-const updateUser = async (req, res, next) => {
-  const { id } = req.params;
-  const { resetPassword } = req.query;
-
-  try {
-    if (!allowedUpdateUser.includes(req.userRole) && req.userId != id) {
-      res.status(403).json({ message: "Quyền truy cập bị từ chối" });
-      return;
-    }
-
-    // remove password, role, oid
-    const { password, oldPassword, role, id: oid, ...data } = req.body;
-
-    if (allowedUpdateUser.includes(req.userRole) && resetPassword !== "true") {
-      data.role = role;
-      if (password) data.password = await bcrypt.hash(password, 12);
     }
 
     if (resetPassword === "true") {
@@ -146,10 +102,24 @@ const updateUser = async (req, res, next) => {
       data.password = await bcrypt.hash(password, 12);
     }
 
-    data.last_updated_at = new Date();
-    data.last_updated_by = req.userId;
-    const updated = await userModel.updateById(id, data);
-    res.status(201).json({ updated });
+    userData.last_updated_at = new Date();
+    userData.last_updated_by = req.userId;
+    const updated = await userModel.updateById(id, userData);
+
+    const refs = {};
+    if (EMPLOYEE_ROLES.includes(role)) {
+      if (employeeId) {
+        employeeData.userId = userId || id;
+        const result = await employeeModel.updateById(employeeId, employeeData);
+        refs.userEmployees = { [id]: result };
+      } else {
+        employeeData.userId = id;
+        const result = await employeeModel.create(employeeData);
+        refs.userEmployees = { [id]: result };
+      }
+    }
+
+    res.status(201).json({ updated, refs });
   } catch (error) {
     next(error);
   }
@@ -253,7 +223,7 @@ const getUserByIdWithRefs = async (req, res, next) => {
 
     // get data
     const promises = [null, null, []];
-    if (EMPLOYEE_ROLES.concat("teacher").includes(role)) {
+    if (EMPLOYEE_ROLES.includes(role)) {
       promises[0] = employeeModel.findOne({ userId: id });
     }
 
@@ -270,7 +240,7 @@ const getUserByIdWithRefs = async (req, res, next) => {
 
     // merge data
     const refs = {};
-    if (EMPLOYEE_ROLES.concat("teacher").includes(role)) {
+    if (EMPLOYEE_ROLES.includes(role)) {
       const { id: employeeId, userId, ...employeeData } = employee || {};
       user = { ...user, ...employeeData, employeeId };
     }
@@ -291,10 +261,10 @@ const getUserByIdWithRefs = async (req, res, next) => {
 };
 
 export const userMiddlewares = {
-  get: [auth, roles(["admin"]), getUsersWithRole],
+  get: [auth, getUsersWithRole],
   getById: [auth, getUserByIdWithRefs],
-  create: [auth, createUserWithRole],
-  update: [auth, updateUserWithRole],
+  create: [auth],
+  update: [auth],
 };
 
 export default {
@@ -305,4 +275,5 @@ export default {
   verifyResetPasswordCode,
   resetPassword,
   update: updateUser,
+  create: createUser,
 };
