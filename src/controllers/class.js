@@ -78,9 +78,9 @@ const getClassByIdWithRefs = async (req, res, next) => {
 };
 
 export const classMiddleWares = {
-  get: [auth, roles(["admin", "finance-officer"]), getClassWithRefs],
-  create: [auth, roles(["admin", "finance-officer"])],
-  delete: [auth, roles(["admin", "finance-officer"])],
-  update: [auth, roles(["admin", "finance-officer"])],
-  getById: [auth, roles(["admin", "finance-officer"]), getClassByIdWithRefs],
+  get: [auth, getClassWithRefs],
+  create: [auth],
+  delete: [auth],
+  update: [auth],
+  getById: [auth, getClassByIdWithRefs],
 };

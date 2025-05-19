@@ -6,16 +6,7 @@ import { courseController } from "../controllers/index.js";
 const courseRoute = express.Router();
 
 // CRUD
-const commonMiddlewares = [auth, roles(["admin"])];
-generateCRUDRoutes(courseRoute, courseController, {
-  middlewares: {
-    get: commonMiddlewares,
-    create: commonMiddlewares,
-    getById: commonMiddlewares,
-    update: commonMiddlewares,
-    delete: commonMiddlewares,
-  },
-});
+generateCRUDRoutes(courseRoute, courseController);
 // others
 
 export default courseRoute;
