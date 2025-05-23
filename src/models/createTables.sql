@@ -104,12 +104,11 @@ CREATE TABLE IF NOT EXISTS student_consultation (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     gender VARCHAR(50),
-    email VARCHAR(100) UNIQUE NOT NULL,
+    email VARCHAR(100) NOT NULL,
     phone_number VARCHAR(100),
     date_of_birth DATE,
     address VARCHAR(255),
-    status VARCHAR(255),
-    priority VARCHAR(255),
+    status VARCHAR(255) NOT NULL,
     source VARCHAR(255),
     note TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -130,6 +129,7 @@ CREATE TABLE IF NOT EXISTS student_consultation (
 -- ;
 -- student_consultation indexes;
 CREATE INDEX IF NOT EXISTS idx_student_consultation_student_id ON student_consultation (student_id);
+CREATE INDEX IF NOT EXISTS idx_student_consultation_status ON student_consultation (status);
 CREATE INDEX IF NOT EXISTS idx_student_consultation_expected_course_id ON student_consultation (expected_course_id);
 CREATE INDEX IF NOT EXISTS idx_student_consultation_expected_class_id ON student_consultation (expected_class_id);
 CREATE INDEX IF NOT EXISTS idx_student_consultation_consultant_id ON student_consultation (consultant_id);
@@ -175,7 +175,6 @@ CREATE TABLE IF NOT EXISTS classes (
     closing_day DATE NOT NULL,
     number_of_lessons INT NOT NULL,
     number_of_students INT NOT NULL,
-    status VARCHAR(255),
     level INT,
     description TEXT,
     last_updated_at TIMESTAMPTZ DEFAULT NOW(),
@@ -195,6 +194,30 @@ CREATE INDEX IF NOT EXISTS idx_classes_shift_id ON classes (shift_id);
 CREATE INDEX IF NOT EXISTS idx_classes_teacher_id ON classes (teacher_id);
 CREATE INDEX IF NOT EXISTS idx_classes_course_id ON classes (course_id);
 CREATE INDEX IF NOT EXISTS idx_classes_name_trgm ON classes USING GIN (name gin_trgm_ops);
+--;
+-- create table enrollments if not exits;
+CREATE TABLE IF NOT EXISTS class_schedules (
+    id SERIAL PRIMARY KEY,
+    date DATE NOT NULL,
+    is_deleted BOOLEAN,
+    is_absented BOOLEAN,
+    note TEXT,
+    last_updated_at TIMESTAMPTZ DEFAULT NOW(),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    class_id INT REFERENCES classes(id) ON DELETE
+    SET NULL,
+        shift_id INT REFERENCES shifts(id) ON DELETE
+    SET NULL,
+        teacher_id INT REFERENCES users(id) ON DELETE
+    SET NULL,
+        last_updated_by INT REFERENCES users(id) ON DELETE
+    SET NULL,
+        created_by INT REFERENCES users(id) ON DELETE
+    SET NULL,
+        UNIQUE ("date", "class_id")
+);
+CREATE INDEX IF NOT EXISTS idx_class_schedules_class_id ON class_schedules (class_id);
+CREATE INDEX IF NOT EXISTS idx_class_schedules_date ON class_schedules (date);
 --;
 -- create table enrollments if not exits;
 CREATE TABLE IF NOT EXISTS enrollments (

@@ -48,7 +48,7 @@ const findUserClasses = keyConvertWrapper(async (userIds, pager = null, order = 
 
 const findStudents = keyConvertWrapper(async (classIds, pager = null, order = ORDER, userFields = []) => {
   const fieldsStr = generateFieldsStr(userFields, "u");
-  const orderStr = generateOrderStr(order, "c");
+  const orderStr = generateOrderStr(order, "u");
 
   const query = `
   SELECT ${fieldsStr}, e.id as enrollment_id, e.class_id

@@ -18,6 +18,7 @@ export const defaultUser = {
   email: null,
   password: null,
   name: null,
+  gender: null,
   role: null,
   dateOfBirth: null,
   phoneNumber: null,
@@ -54,9 +55,9 @@ const findEmployee = keyConvertWrapper(
         ? Object.keys(employee).filter((f) => employeeFields.includes(f))
         : Object.keys(employee);
 
-    const { password, ...useFields } = defaultUserConverted;
-    const useFieldsStr = generateFieldsStr(Object.keys(useFields), "u");
-    const fieldsStr = `${useFieldsStr}, e.id AS employee_id, ` + filteredFields.map((key) => "e." + key).join(", ");
+    const { password, ...userFields } = defaultUserConverted;
+    const userFieldsStr = generateFieldsStr(Object.keys(userFields), "u");
+    const fieldsStr = `${userFieldsStr}, e.id AS employee_id, ` + filteredFields.map((key) => "e." + key).join(", ");
 
     const query = `SELECT ${fieldsStr} FROM users u LEFT JOIN employees e ON u.id = e.user_id`;
     const { filterStr, values } = generateFilterString(filterMerged, pager);
@@ -80,9 +81,9 @@ const findEmployeeById = keyConvertWrapper(async (id, employeeFields) => {
   const filteredFields =
     employeeFields.length > 0 ? Object.keys(employee).filter((f) => employeeFields.includes(f)) : Object.keys(employee);
 
-  const { password, ...useFields } = defaultUserConverted;
-  const useFieldsStr = generateFieldsStr(Object.keys(useFields), "u");
-  const fieldsStr = `${useFieldsStr}, e.id AS employee_id, ` + filteredFields.map((key) => "e." + key).join(", ");
+  const { password, ...userFields } = defaultUserConverted;
+  const userFieldsStr = generateFieldsStr(Object.keys(userFields), "u");
+  const fieldsStr = `${userFieldsStr}, e.id AS employee_id, ` + filteredFields.map((key) => "e." + key).join(", ");
   const query = `SELECT ${fieldsStr} FROM users u LEFT JOIN employees e ON u.id = e.user_id WHERE u.id = $1`;
   const values = [id];
 

@@ -1,7 +1,18 @@
-import groupBy from "lodash/groupBy.js";
-import { auth, roles } from "../middlewares/index.js";
+import { auth } from "../middlewares/index.js";
 import { classModel, courseModel, enrollmentModel, shiftModel, userModel } from "../models/index.js";
 import { arrayToObject, transformQueryToFilterObject } from "../utils/index.js";
+
+// [GET] /classes/:id/students
+export const getClassStudents = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { refFields = ":basic" } = req.query;
+    const students = await classModel.findStudents([id], null, req.order, userModel.getFields(refFields));
+    res.status(200).json({ students });
+  } catch (error) {
+    next(error);
+  }
+};
 
 // [GET] /classes?refs=true
 const getClassWithRefs = async (req, res, next) => {
@@ -26,17 +37,17 @@ const getClassWithRefs = async (req, res, next) => {
       [[], [], [], []]
     );
 
-    const [[users], [shifts], [courses], students] = await Promise.all([
+    const [[users], [shifts], [courses], studentCounts] = await Promise.all([
       userModel.find({ id: { in: userIds } }, req.pager, null, userModel.getFields(refFields)),
       shiftModel.find({ id: { in: shiftIds } }, req.pager, null, shiftModel.getFields(refFields)),
       courseModel.find({ id: { in: courseIds } }, req.pager, null, courseModel.getFields(refFields)),
-      classModel.findStudents(classIds, req.pager, null, userModel.getFields(refFields)),
+      enrollmentModel.countBy("classId", { classId: { in: classIds } }),
     ]);
 
     refData.users = arrayToObject(users, "id");
     refData.shifts = arrayToObject(shifts, "id");
     refData.courses = arrayToObject(courses, "id");
-    refData.students = groupBy(students, "classId");
+    refData.studentCounts = arrayToObject(studentCounts, "classId");
 
     res.status(200).json({ rows, pager, refs: refData });
   } catch (error) {
@@ -56,21 +67,15 @@ const getClassByIdWithRefs = async (req, res, next) => {
 
     if (!item) return res.status(404).json({ message: "Không tìm thấy kết quả!" });
 
-    const [enrolls] = await enrollmentModel.find({ classId: id }, null, null);
-    const [studentIds, enrollmentIds] = enrolls.reduce(
-      (acc, s) => [acc[0].concat(s.studentId), acc[1].concat(s.id)],
-      [[], []]
-    );
-
-    const [teacher, [students], course] = await Promise.all([
+    const [teacher, course, studentCount] = await Promise.all([
       userModel.findById(item.teacherId, userModel.getFields(refFields)),
-      userModel.find({ id: { in: studentIds } }, null, null, userModel.getFields(refFields)),
       courseModel.findOne({ id: item.courseId }, courseModel.getFields(refFields)),
+      enrollmentModel.countBy("classId", { classId: id }),
     ]);
 
     res.status(200).json({
       item,
-      refs: { students: students.map((s, index) => ({ ...s, enrollmentId: enrollmentIds[index] })), teacher, course },
+      refs: { studentCount: studentCount[0], teacher, course },
     });
   } catch (error) {
     next(error);

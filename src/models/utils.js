@@ -142,6 +142,15 @@ export const generateCommonServices = (tableName) => {
       const result = await pgDB.query(query, values);
       return result.rows[0] ?? null;
     }),
+
+    countBy: keyConvertWrapper(async (countBy, filter = {}) => {
+      const { filterStr, values } = generateFilterString(filter);
+      const query = `SELECT ${countBy}, COUNT(*) AS total FROM ${tableName} ${filterStr} GROUP BY ${countBy}`;
+
+      console.log("countBy:", query, values);
+      const result = await pgDB.query(query, values);
+      return result.rows;
+    }),
   };
 };
 

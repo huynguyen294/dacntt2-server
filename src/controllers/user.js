@@ -1,7 +1,8 @@
 import { classModel, employeeModel, userModel } from "../models/index.js";
 import { transformQueryToFilterObject } from "../utils/index.js";
 import { EMPLOYEE_ROLES } from "../constants/index.js";
-import { auth, roles } from "../middlewares/index.js";
+import { auth } from "../middlewares/index.js";
+import { sendMail } from "./utils.js";
 import bcrypt from "bcryptjs";
 import groupBy from "lodash/groupBy.js";
 
@@ -28,6 +29,8 @@ const signUp = async (req, res, next) => {
 
 //[POST] /users
 const createUser = async (req, res, next) => {
+  const { sendmailNewAccount } = req.query;
+
   try {
     const { role, employmentType, certificates, major, startDate, salary, status, note, ...userData } = req.body;
     const employeeData = { employmentType, certificates, major, startDate, salary, status, note };
@@ -42,7 +45,6 @@ const createUser = async (req, res, next) => {
 
     // only allowedUpdateUser can assign role
     if (allowedUpdateUser.includes(req.userRole)) userData.role = role;
-
     const created = await userModel.create(userData);
 
     const refs = {};
@@ -50,6 +52,21 @@ const createUser = async (req, res, next) => {
       employeeData.userId = created.id;
       const newEmployee = await employeeModel.create(employeeData);
       refs.userEmployees = { [created.id]: newEmployee };
+    }
+
+    if (sendmailNewAccount === "true") {
+      await sendMail({
+        email,
+        subject: "Cấp tài khoản thành công",
+        html: `<div>
+      <p>Bạn đã được cấp tài khoản tại trung tâm với thông tin đăng nhập:</p>
+      <div style="border-radius: 8px; padding: 8px; background-color: #efefef;">
+      <p style="margin: 2px"><strong>Tên đăng nhập</strong>: ${email}</p>
+      <p style="margin: 2px"><strong>Mật khẩu</strong>: ${password}</p>
+      </div>
+      <p><strong>Lưu ý</strong>: Đây là mật khẩu mặc định, bạn có thể thay đổi ở phần 'Hồ sơ cá nhân' để bảo mật tài khoản.</p>
+      </div>`,
+      });
     }
 
     res.status(201).json({ created, refs });
