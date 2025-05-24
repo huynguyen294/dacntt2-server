@@ -51,8 +51,8 @@ const getStudentWithRefs = async (req, res, next) => {
 // !studentId
 const createAccount = async (req, res, next) => {
   try {
-    const { studentId } = req.body;
-    if (studentId) return next();
+    const { studentId, status } = req.body;
+    if (studentId || status !== "Đã đồng ý") return next();
 
     const { email, name, gender, dateOfBirth, phoneNumber, address, password } = req.body;
     const userData = { email, name, gender, dateOfBirth, phoneNumber, address, password, role: "student" };
