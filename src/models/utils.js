@@ -63,6 +63,29 @@ export const generateCommonServices = (tableName) => {
       return result.rows[0];
     }),
 
+    updateMany: keyConvertWrapper(async (list = []) => {
+      // const values = [];
+      // const fields = list.reduce((acc, data) => {
+      //   Object.keys(data).forEach((field) => !acc.includes(field) && acc.push(field));
+      //   return acc;
+      // }, []);
+      // const valuesStr = list
+      //   .map((data) => {
+      //     const valuesStr = fields
+      //       .map((f) => {
+      //         values.push(data[f] || null);
+      //         return "$" + values.length;
+      //       })
+      //       .join(", ");
+      //     return `(${valuesStr})`;
+      //   })
+      //   .join(", ");
+      // const query = `UPDATE ${tableName} SET ${valuesStr} WHERE id = $${values.length} RETURNING *`;
+      // console.log("updateById:", query);
+      // const result = await pgDB.query(query, values);
+      // return result.rows[0];
+    }),
+
     delete: keyConvertWrapper(async (id) => {
       const query = `DELETE FROM ${tableName} WHERE id = $1 RETURNING *`;
       const values = [id];

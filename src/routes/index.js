@@ -10,6 +10,11 @@ import shiftRoute from "./shift.js";
 import examRoute from "./exam.js";
 import studentExamRoute from "./studentExam.js";
 import studentConsultationRoute from "./studentConsultation.js";
+import classScheduleRoute from "./classSchedule.js";
+import classExerciseRoute from "./classExercise.js";
+import classTopicRoute from "./classTopic.js";
+import classExerciseTopicRoute from "./classExerciseTopic.js";
+import classAttendanceRoute from "./classAttendance.js";
 
 const route = (app) => {
   app.use("/api-v1/auth", authRoute);
@@ -23,6 +28,11 @@ const route = (app) => {
   app.use("/api-v1/exams", examRoute);
   app.use("/api-v1/student-exam", studentExamRoute);
   app.use("/api-v1/student-consultation", studentConsultationRoute);
+  app.use("/api-v1/class-schedules", classScheduleRoute);
+  app.use("/api-v1/class-exercises", classExerciseRoute);
+  app.use("/api-v1/class-topics", classTopicRoute);
+  app.use("/api-v1/class-exercise-topic", classExerciseTopicRoute);
+  app.use("/api-v1/class-attendances", classAttendanceRoute);
   app.use("/api-v1/db", dbRoute);
   app.use((req, res, next) => {
     res.send("Không tìm thấy đường dẫn!");

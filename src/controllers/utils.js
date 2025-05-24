@@ -32,22 +32,18 @@ export const generateCRUD = (model, { isJunctionTable = false, searchFields = ["
       try {
         const data = req.body;
         if (!Array.isArray(data[model.tableName])) {
-          if (!isJunctionTable) {
-            data.created_by = req.userId;
-            data.last_updated_at = new Date();
-            data.last_updated_by = req.userId;
-          }
+          data.created_by = req.userId;
+          data.last_updated_at = new Date();
+          data.last_updated_by = req.userId;
 
           const created = await model.create(data);
           return res.status(201).json({ created });
         }
 
         let transformed = data[model.tableName].map((d) => {
-          if (!isJunctionTable) {
-            d.created_by = req.userId;
-            d.last_updated_at = new Date();
-            d.last_updated_by = req.userId;
-          }
+          d.created_by = req.userId;
+          d.last_updated_at = new Date();
+          d.last_updated_by = req.userId;
           return d;
         });
 

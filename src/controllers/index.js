@@ -1,6 +1,11 @@
 import {
   certificateModel,
+  classAttendanceModel,
+  classExerciseModel,
+  classExerciseTopicModel,
   classModel,
+  classScheduleModel,
+  classTopicModel,
   courseModel,
   enrollmentModel,
   examModel,
@@ -43,6 +48,26 @@ export const studentConsultationController = commonStudentConsultationCRUD;
 // studentExam
 const commonStudentExamCRUD = generateCRUD(studentExamModel);
 export const studentExamController = commonStudentExamCRUD;
+
+// classSchedule
+const commonClassScheduleCRUD = generateCRUD(classScheduleModel);
+export const classScheduleController = commonClassScheduleCRUD;
+
+// classExercise
+const commonClassExerciseCRUD = generateCRUD(classExerciseModel);
+export const classExerciseController = commonClassExerciseCRUD;
+
+// classTopic
+const commonClassTopicCRUD = generateCRUD(classTopicModel);
+export const classTopicController = commonClassTopicCRUD;
+
+// classExerciseTopic
+const commonClassExerciseTopicCRUD = generateCRUD(classExerciseTopicModel);
+export const classExerciseTopicController = commonClassExerciseTopicCRUD;
+
+// classAttendance
+const commonClassAttendanceCRUD = generateCRUD(classAttendanceModel);
+export const classAttendanceController = commonClassAttendanceCRUD;
 
 // userModel
 const commonUserCRUD = generateCRUD(userModel, { searchFields: ["name", "email", "phoneNumber"] });
