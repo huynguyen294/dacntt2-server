@@ -27,7 +27,7 @@ const getStudentWithRefs = async (req, res, next) => {
     );
 
     const { status, consultantId, ...countFilter } = filterObj;
-    if (req.userRole === "admin" && consultantId) countFilter.consultantId = consultantId;
+    if (consultantId && status !== "Chờ tư vấn") countFilter.consultantId = consultantId;
 
     const [[users], [classes], [courses], counted] = await Promise.all([
       userModel.find({ id: { in: userIds } }, req.pager, null, userModel.getFields(refFields)),
