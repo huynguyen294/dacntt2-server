@@ -1,4 +1,4 @@
-export const PAGER = { total: 0, pageCount: 1, page: 1, pageSize: 50 };
+export const PAGER = { total: 0, pageCount: 1, page: 1, pageSize: 20 };
 export const ORDER = { order: "DESC", orderBy: "created_at" };
 export const EMPLOYEE_ROLES = ["consultant", "finance-officer", "teacher"];
 

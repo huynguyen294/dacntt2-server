@@ -5,6 +5,8 @@ import { convertToCamelShallow, convertToSnakeShallow } from "../utils/index.js"
 
 export const generateCommonServices = (tableName) => {
   return {
+    // use for create many and update many when the payload { [tableName]: Object[] }
+    // so camelCase this
     tableName: camelCase(tableName),
 
     create: keyConvertWrapper(async (data) => {
@@ -14,7 +16,7 @@ export const generateCommonServices = (tableName) => {
 
       const query = `INSERT INTO ${tableName} (${fieldsStr}) VALUES (${valuesStr}) RETURNING *`;
       const values = fields.map((f) => data[f] || null);
-      console.log("create:", query);
+      console.log("create:", query, values);
 
       const result = await pgDB.query(query, values);
       return result.rows[0];
@@ -43,8 +45,8 @@ export const generateCommonServices = (tableName) => {
 
       const fieldsStr = fields.join(", ");
       const query = `INSERT INTO ${tableName} (${fieldsStr}) VALUES ${valuesStr} ${exceptsStr} RETURNING *`;
-      console.log("createMany:", query, fields, values);
 
+      console.log("createMany:", query, values);
       const result = await pgDB.query(query, values);
       return result.rows;
     }),
@@ -57,39 +59,47 @@ export const generateCommonServices = (tableName) => {
       values.push(id);
 
       const query = `UPDATE ${tableName} SET ${valuesStr} WHERE id = $${values.length} RETURNING *`;
-      console.log("updateById:", query);
+      console.log("updateById:", query, values);
 
       const result = await pgDB.query(query, values);
       return result.rows[0];
     }),
 
     updateMany: keyConvertWrapper(async (list = []) => {
-      // const values = [];
-      // const fields = list.reduce((acc, data) => {
-      //   Object.keys(data).forEach((field) => !acc.includes(field) && acc.push(field));
-      //   return acc;
-      // }, []);
-      // const valuesStr = list
-      //   .map((data) => {
-      //     const valuesStr = fields
-      //       .map((f) => {
-      //         values.push(data[f] || null);
-      //         return "$" + values.length;
-      //       })
-      //       .join(", ");
-      //     return `(${valuesStr})`;
-      //   })
-      //   .join(", ");
-      // const query = `UPDATE ${tableName} SET ${valuesStr} WHERE id = $${values.length} RETURNING *`;
-      // console.log("updateById:", query);
-      // const result = await pgDB.query(query, values);
-      // return result.rows[0];
+      try {
+        await pgDB.query("BEGIN");
+        const values = list.map((u) => u.id);
+        const fields = list.reduce((acc, data) => {
+          Object.keys(data).forEach((field) => field !== "id" && !acc.includes(field) && acc.push(field));
+          return acc;
+        }, []);
+
+        let query = `UPDATE ${tableName} SET \n`;
+        const listCase = fields.map((field) => {
+          let caseStr = "";
+          list.forEach((item, index) => {
+            values.push(item[field] || null);
+            caseStr += `WHEN id = $${index + 1} THEN $${values.length} \n`;
+          });
+          return `${field} = CASE \n${caseStr} END`;
+        });
+        query += listCase.join(",\n") + "\n";
+
+        console.log("updateMany:", query, values);
+        const result = await pgDB.query(query, values);
+        await pgDB.query("COMMIT");
+
+        return result.rows;
+      } catch (error) {
+        await pgDB.query("ROLLBACK");
+        throw error;
+      }
     }),
 
     delete: keyConvertWrapper(async (id) => {
       const query = `DELETE FROM ${tableName} WHERE id = $1 RETURNING *`;
       const values = [id];
-      console.log("delete:", query);
+      console.log("delete:", query, values);
 
       const result = await pgDB.query(query, values);
       return result.rows[0];
@@ -98,7 +108,7 @@ export const generateCommonServices = (tableName) => {
     deleteMany: keyConvertWrapper(async (listId = []) => {
       const query = `DELETE FROM ${tableName} WHERE id = ANY($1) RETURNING *`;
       const values = [listId];
-      console.log("delete:", query);
+      console.log("delete:", query, values);
 
       const result = await pgDB.query(query, values);
       return result.rows[0];
@@ -130,7 +140,7 @@ export const generateCommonServices = (tableName) => {
       const { filterStr, values } = generateFilterString(filter);
       const finalQuery = query + filterStr + " LIMIT 1";
 
-      console.log("findOne:", finalQuery);
+      console.log("findOne:", finalQuery, values);
       const result = await pgDB.query(finalQuery, values);
       return result.rows[0] ?? null;
     }),
@@ -140,7 +150,7 @@ export const generateCommonServices = (tableName) => {
       const query = `SELECT ${fieldsStr} FROM ${tableName} WHERE ${idField} = ANY($1)`;
       const values = [listId];
 
-      console.log("findOne:", query);
+      console.log("findOne:", query, values);
       const result = await pgDB.query(query, values);
       return result.rows;
     }),
@@ -151,7 +161,7 @@ export const generateCommonServices = (tableName) => {
       let finalQuery = query + filterStr;
 
       finalQuery = `SELECT 1 WHERE EXISTS (${finalQuery})`;
-      console.log("findOne:", finalQuery);
+      console.log("findOne:", finalQuery, values);
       const result = await pgDB.query(finalQuery, values);
       return Boolean(result.rows[0]);
     }),
@@ -160,7 +170,7 @@ export const generateCommonServices = (tableName) => {
       const fieldsStr = generateFieldsStr(fields);
       const query = `SELECT ${fieldsStr} FROM ${tableName} WHERE id = $1`;
       const values = [id];
-      console.log("findById:", query);
+      console.log("findById:", query, values);
 
       const result = await pgDB.query(query, values);
       return result.rows[0] ?? null;
@@ -192,7 +202,7 @@ export const generateOrderStr = (orderObj, shortName) => {
   return ` ORDER BY ${order_by} ${order} ${nullStr}`;
 };
 
-export const generatePager = async (tableName, filter = {}, pager) => {
+export const generatePager = async (tableName, filter = {}, pager, valueSize) => {
   if (!pager) return [null, ""];
   const { page, page_size } = pager;
 
@@ -205,7 +215,8 @@ export const generatePager = async (tableName, filter = {}, pager) => {
   const total = Number(result.rows[0].count);
   const page_count = Math.ceil(total / page_size) || 1;
   const pagerGenerated = { total, page_count, page, page_size };
-  const pagerStr = ` LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
+
+  const pagerStr = ` LIMIT $${(valueSize || values.length) + 1} OFFSET $${(valueSize || values.length) + 2}`;
 
   return [pagerGenerated, pagerStr];
 };
@@ -248,8 +259,9 @@ export const generateFilterString = (filter) => {
       value = value[opKey];
     }
 
-    values.push(value);
     if (value === true) return `${field} ${operator}`;
+
+    values.push(value);
     if (operator === "ANY") return `${field} = ${operator}($${values.length})`;
     return `${field} ${operator} $${values.length}`;
   };
@@ -258,7 +270,7 @@ export const generateFilterString = (filter) => {
     let value = filter[field];
 
     // handle search
-    if (field === "search") {
+    if (field === "search" || field.includes(".search")) {
       // Add AND if not the first condition
       // Add AND if not the first condition
       if (values.length > 0) currentFilterStr += " AND ";

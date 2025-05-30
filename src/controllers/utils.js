@@ -33,17 +33,21 @@ export const generateCRUD = (model, { isJunctionTable = false, searchFields = ["
         const data = req.body;
         if (!Array.isArray(data[model.tableName])) {
           data.created_by = req.userId;
-          data.last_updated_at = new Date();
-          data.last_updated_by = req.userId;
+          if (!isJunctionTable) {
+            data.last_updated_by = req.userId;
+            data.last_updated_at = new Date();
+          }
 
           const created = await model.create(data);
           return res.status(201).json({ created });
         }
 
-        let transformed = data[model.tableName].map((d) => {
+        const transformed = data[model.tableName].map((d) => {
           d.created_by = req.userId;
-          d.last_updated_at = new Date();
-          d.last_updated_by = req.userId;
+          if (!isJunctionTable) {
+            d.last_updated_at = new Date();
+            d.last_updated_by = req.userId;
+          }
           return d;
         });
 
@@ -72,14 +76,27 @@ export const generateCRUD = (model, { isJunctionTable = false, searchFields = ["
       const { id } = req.params;
       const data = req.body;
 
-      if (!isJunctionTable) {
-        data.last_updated_at = new Date();
-        data.last_updated_by = req.userId;
-      }
-
       try {
-        const updated = await model.updateById(id, data);
-        res.status(201).json({ updated });
+        if (!Array.isArray(data[model.tableName])) {
+          if (!isJunctionTable) {
+            data.last_updated_at = new Date();
+            data.last_updated_by = req.userId;
+          }
+
+          const updated = await model.updateById(id, data);
+          return res.status(201).json({ updated });
+        }
+
+        const transformed = data[model.tableName].map((d) => {
+          if (!isJunctionTable) {
+            d.last_updated_at = new Date();
+            d.last_updated_by = req.userId;
+          }
+          return d;
+        });
+
+        const updated = await model.updateMany(transformed);
+        return res.status(201).json({ updated });
       } catch (error) {
         next(error);
       }

@@ -12,5 +12,4 @@ export { default as studentConsultationModel } from "./studentConsultation.js";
 export { default as classScheduleModel } from "./classSchedule.js";
 export { default as classExerciseModel } from "./classExercise.js";
 export { default as classTopicModel } from "./classTopic.js";
-export { default as classExerciseTopicModel } from "./classExerciseTopic.js";
 export { default as classAttendanceModel } from "./classAttendance.js";

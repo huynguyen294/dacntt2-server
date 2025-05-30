@@ -11,7 +11,9 @@ const getStudentWithRefs = async (req, res, next) => {
     if (refs !== "true") return next();
 
     const { refFields = ":basic" } = req.query;
-    const filterObj = transformQueryToFilterObject(req.query, ["name", "email", "phone_number"]);
+    const { consultantId, ...filterObj } = transformQueryToFilterObject(req.query, ["name", "email", "phone_number"]);
+    if (consultantId) filterObj.consultantId = [consultantId, { isNull: true }];
+
     const [rows, pager] = await studentConsultationModel.find(filterObj, req.pager, req.order);
 
     const refData = {};
@@ -26,9 +28,7 @@ const getStudentWithRefs = async (req, res, next) => {
       [[], [], []]
     );
 
-    const { status, consultantId, ...countFilter } = filterObj;
-    if (consultantId && status !== "Chờ tư vấn") countFilter.consultantId = consultantId;
-
+    const { status, ...countFilter } = filterObj;
     const [[users], [classes], [courses], counted] = await Promise.all([
       userModel.find({ id: { in: userIds } }, req.pager, null, userModel.getFields(refFields)),
       classModel.find({ id: { in: classIds } }, req.pager, null, classModel.getFields(refFields)),

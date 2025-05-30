@@ -44,8 +44,11 @@ const findEmployee = keyConvertWrapper(
     const userFilter = filterPropertyByDefaultObject(filter, defaultUserConverted, ["search"]);
     const employeeFilter = filterPropertyByDefaultObject(filter, defaultEmployeeConverted);
     const filterMerged = mergeFilterByShortName({ u: userFilter, e: employeeFilter });
-
-    const [pagerGenerated, pagerStr] = await generatePager("users", userFilter, pager);
+    if (filterMerged["u.search"]) {
+      filterMerged["u.search"] = filterMerged["u.search"].map((obj) => ({
+        [`u.${Object.keys(obj)[0]}`]: Object.values(obj)[0],
+      }));
+    }
 
     const orderShortName = defaultUserConverted.hasOwnProperty(order.order_by) ? "u" : "e";
     const orderStr = generateOrderStr(order, orderShortName);
@@ -60,14 +63,16 @@ const findEmployee = keyConvertWrapper(
     const fieldsStr = `${userFieldsStr}, e.id AS employee_id, ` + filteredFields.map((key) => "e." + key).join(", ");
 
     const query = `SELECT ${fieldsStr} FROM users u LEFT JOIN employees e ON u.id = e.user_id`;
-    const { filterStr, values } = generateFilterString(filterMerged, pager);
-    const finalQuery = query + filterStr + orderStr + pagerStr;
+    const { filterStr, values } = generateFilterString(filterMerged);
+    const [pagerGenerated, pagerStr] = await generatePager("users", userFilter, pager, values.length);
 
     if (pagerStr) {
       values.push(pager.page_size);
       const offset = (pager.page - 1) * pager.page_size;
       values.push(offset);
     }
+
+    const finalQuery = query + filterStr + orderStr + pagerStr;
 
     console.log("find employee:", finalQuery, values);
     const result = await pgDB.query(finalQuery, values);

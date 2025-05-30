@@ -2,7 +2,6 @@ import {
   certificateModel,
   classAttendanceModel,
   classExerciseModel,
-  classExerciseTopicModel,
   classModel,
   classScheduleModel,
   classTopicModel,
@@ -58,12 +57,8 @@ const commonClassExerciseCRUD = generateCRUD(classExerciseModel);
 export const classExerciseController = commonClassExerciseCRUD;
 
 // classTopic
-const commonClassTopicCRUD = generateCRUD(classTopicModel);
+const commonClassTopicCRUD = generateCRUD(classTopicModel, { isJunctionTable: true });
 export const classTopicController = commonClassTopicCRUD;
-
-// classExerciseTopic
-const commonClassExerciseTopicCRUD = generateCRUD(classExerciseTopicModel);
-export const classExerciseTopicController = commonClassExerciseTopicCRUD;
 
 // classAttendance
 const commonClassAttendanceCRUD = generateCRUD(classAttendanceModel);
