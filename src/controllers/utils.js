@@ -95,7 +95,7 @@ export const generateCRUD = (model, { isJunctionTable = false, searchFields = ["
           return d;
         });
 
-        const updated = await model.updateMany(transformed);
+        const updated = await Promise.all(transformed.map((item) => model.updateById(item.id, item)));
         return res.status(201).json({ updated });
       } catch (error) {
         next(error);

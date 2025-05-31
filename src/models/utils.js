@@ -65,6 +65,7 @@ export const generateCommonServices = (tableName) => {
       return result.rows[0];
     }),
 
+    // old - not working because value type
     updateMany: keyConvertWrapper(async (list = []) => {
       try {
         await pgDB.query("BEGIN");
@@ -74,16 +75,47 @@ export const generateCommonServices = (tableName) => {
           return acc;
         }, []);
 
-        let query = `UPDATE ${tableName} SET \n`;
+        let query = `UPDATE ${tableName} SET `;
         const listCase = fields.map((field) => {
           let caseStr = "";
           list.forEach((item, index) => {
             values.push(item[field] || null);
-            caseStr += `WHEN id = $${index + 1} THEN $${values.length} \n`;
+            caseStr += ` WHEN id = $${index + 1} THEN $${values.length} `;
           });
-          return `${field} = CASE \n${caseStr} END`;
+          return ` ${field} = CASE ${caseStr} END `;
         });
-        query += listCase.join(",\n") + "\n";
+        query += listCase.join(",");
+
+        console.log("updateMany:", query, values);
+        const result = await pgDB.query(query, values);
+        await pgDB.query("COMMIT");
+
+        return result.rows;
+      } catch (error) {
+        await pgDB.query("ROLLBACK");
+        throw error;
+      }
+    }),
+
+    updateMany: keyConvertWrapper(async (list = []) => {
+      try {
+        await pgDB.query("BEGIN");
+        const values = list.map((u) => u.id);
+        const fields = list.reduce((acc, data) => {
+          Object.keys(data).forEach((field) => field !== "id" && !acc.includes(field) && acc.push(field));
+          return acc;
+        }, []);
+
+        let query = `UPDATE ${tableName} SET `;
+        const listCase = fields.map((field) => {
+          let caseStr = "";
+          list.forEach((item, index) => {
+            values.push(item[field] || null);
+            caseStr += ` WHEN id = $${index + 1} THEN $${values.length} `;
+          });
+          return ` ${field} = CASE ${caseStr} END `;
+        });
+        query += listCase.join(",");
 
         console.log("updateMany:", query, values);
         const result = await pgDB.query(query, values);

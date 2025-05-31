@@ -260,7 +260,7 @@ CREATE TABLE IF NOT EXISTS class_attendances (
         created_by INT REFERENCES users(id) ON DELETE
     SET NULL,
         lesson_id INT REFERENCES class_schedules(id) ON DELETE CASCADE,
-        UNIQUE ("student_id", "lesson_id")
+        UNIQUE ("student_id", "lesson_id", "class_id")
 );
 CREATE INDEX IF NOT EXISTS idx_class_attendances_attend ON class_attendances (attend);
 CREATE INDEX IF NOT EXISTS idx_class_attendances_class_id ON class_attendances (class_id);
