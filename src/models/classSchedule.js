@@ -5,7 +5,6 @@ import { generateCommonServices } from "./utils.js";
 export const defaultClassSchedule = {
   id: null,
   date: null,
-  isDeleted: null,
   isAbsented: null,
   note: null,
   classId: null,

@@ -1,5 +1,13 @@
 import { auth } from "../middlewares/index.js";
-import { classModel, courseModel, enrollmentModel, shiftModel, userModel } from "../models/index.js";
+import {
+  classModel,
+  classScheduleModel,
+  courseModel,
+  enrollmentModel,
+  shiftModel,
+  userModel,
+} from "../models/index.js";
+import { getClassSchedule } from "../utils/class.js";
 import { arrayToObject, transformQueryToFilterObject } from "../utils/index.js";
 
 // [GET] /classes/:id/students
@@ -82,9 +90,45 @@ const getClassByIdWithRefs = async (req, res, next) => {
   }
 };
 
+// override create method
+// [POST] /classes/
+const createClassWithSchedules = async (req, res, next) => {
+  try {
+    const data = req.body;
+    data.created_by = req.userId;
+    data.last_updated_by = req.userId;
+    data.last_updated_at = new Date();
+
+    const created = await classModel.create(data);
+    const schedules = getClassSchedule(created, req);
+    const schedulesCreated = await classScheduleModel.createMany(schedules);
+
+    return res.status(201).json({ created, schedules: schedulesCreated });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// const dev = async (req, res, next) => {
+//   try {
+//     const [rows] = await classModel.find();
+
+//     let acc = {};
+//     for (const row of rows) {
+//       const schedules = getClassSchedule(row, req);
+//       const schedulesCreated = await classScheduleModel.createMany(schedules);
+//       acc[row.name] = schedulesCreated;
+//     }
+
+//     return res.status(201).json({ acc });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
 export const classMiddleWares = {
   get: [auth, getClassWithRefs],
-  create: [auth],
+  create: [auth, createClassWithSchedules],
   delete: [auth],
   update: [auth],
   getById: [auth, getClassByIdWithRefs],

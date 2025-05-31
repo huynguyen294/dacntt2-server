@@ -61,7 +61,7 @@ const commonClassTopicCRUD = generateCRUD(classTopicModel, { isJunctionTable: tr
 export const classTopicController = commonClassTopicCRUD;
 
 // classAttendance
-const commonClassAttendanceCRUD = generateCRUD(classAttendanceModel);
+const commonClassAttendanceCRUD = generateCRUD(classAttendanceModel, []);
 export const classAttendanceController = commonClassAttendanceCRUD;
 
 // userModel

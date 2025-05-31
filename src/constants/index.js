@@ -1,6 +1,7 @@
 export const PAGER = { total: 0, pageCount: 1, page: 1, pageSize: 20 };
 export const ORDER = { order: "DESC", orderBy: "created_at" };
 export const EMPLOYEE_ROLES = ["consultant", "finance-officer", "teacher"];
+export const DATE_FORMAT = "yyyy-MM-dd";
 
 const ROLES = ["admin", "create", "read", "read_own", "update", "update_own", "delete", "delete_own"];
 

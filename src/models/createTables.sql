@@ -199,14 +199,12 @@ CREATE INDEX IF NOT EXISTS idx_classes_name_trgm ON classes USING GIN (name gin_
 CREATE TABLE IF NOT EXISTS class_schedules (
     id SERIAL PRIMARY KEY,
     date DATE NOT NULL,
-    is_deleted BOOLEAN,
     is_absented BOOLEAN,
     note TEXT,
     last_updated_at TIMESTAMPTZ DEFAULT NOW(),
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    class_id INT REFERENCES classes(id) ON DELETE
-    SET NULL,
-        shift_id INT REFERENCES shifts(id) ON DELETE
+    class_id INT REFERENCES classes(id) ON DELETE CASCADE,
+    shift_id INT REFERENCES shifts(id) ON DELETE
     SET NULL,
         teacher_id INT REFERENCES users(id) ON DELETE
     SET NULL,
@@ -223,9 +221,8 @@ CREATE TABLE IF NOT EXISTS class_topics (
     id SERIAL PRIMARY KEY,
     name VARCHAR(610) NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    class_id INT REFERENCES classes(id) ON DELETE
-    SET NULL,
-        created_by INT REFERENCES users(id) ON DELETE
+    class_id INT REFERENCES classes(id) ON DELETE CASCADE,
+    created_by INT REFERENCES users(id) ON DELETE
     SET NULL
 );
 CREATE INDEX IF NOT EXISTS idx_class_topics_class_id ON class_topics (class_id);
@@ -239,9 +236,8 @@ CREATE TABLE IF NOT EXISTS class_exercises (
     is_draft BOOLEAN,
     last_updated_at TIMESTAMPTZ DEFAULT NOW(),
     created_at TIMESTAMPTZ DEFAULT NOW(),
+    class_id INT REFERENCES classes(id) ON DELETE CASCADE,
     topic_id INT REFERENCES class_topics(id) ON DELETE
-    SET NULL,
-        class_id INT REFERENCES classes(id) ON DELETE
     SET NULL,
         last_updated_by INT REFERENCES users(id) ON DELETE
     SET NULL,
@@ -249,38 +245,35 @@ CREATE TABLE IF NOT EXISTS class_exercises (
     SET NULL
 );
 CREATE INDEX IF NOT EXISTS idx_class_exercises_class_id ON class_exercises (class_id);
-CREATE INDEX IF NOT EXISTS idx_class_schedules_class_id ON class_schedules (class_id);
 -- create table class_attendances if not exits;
 CREATE TABLE IF NOT EXISTS class_attendances (
     id SERIAL PRIMARY KEY,
-    date DATE NOT NULL,
     attend VARCHAR(255) NOT NULL,
     note TEXT,
     last_updated_at TIMESTAMPTZ DEFAULT NOW(),
     created_at TIMESTAMPTZ DEFAULT NOW(),
+    class_id INT REFERENCES classes(id) ON DELETE CASCADE,
     student_id INT REFERENCES users(id) ON DELETE
-    SET NULL,
-        class_id INT REFERENCES classes(id) ON DELETE
     SET NULL,
         last_updated_by INT REFERENCES users(id) ON DELETE
     SET NULL,
         created_by INT REFERENCES users(id) ON DELETE
-    SET NULL
+    SET NULL,
+        lesson_id INT REFERENCES class_schedules(id) ON DELETE CASCADE,
+        UNIQUE ("student_id", "lesson_id")
 );
 CREATE INDEX IF NOT EXISTS idx_class_attendances_attend ON class_attendances (attend);
-CREATE INDEX IF NOT EXISTS idx_class_attendances_date ON class_attendances (date);
 CREATE INDEX IF NOT EXISTS idx_class_attendances_class_id ON class_attendances (class_id);
+CREATE INDEX IF NOT EXISTS idx_class_attendances_lesson_id ON class_attendances (lesson_id);
 --;
 -- create table enrollments if not exits;
 CREATE TABLE IF NOT EXISTS enrollments (
     id SERIAL PRIMARY KEY,
     last_updated_at TIMESTAMPTZ DEFAULT NOW(),
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    student_id INT REFERENCES users(id) ON DELETE
-    SET NULL,
-        class_id INT REFERENCES classes(id) ON DELETE
-    SET NULL,
-        last_updated_by INT REFERENCES users(id) ON DELETE
+    class_id INT REFERENCES classes(id) ON DELETE CASCADE,
+    student_id INT REFERENCES users(id) ON DELETE CASCADE,
+    last_updated_by INT REFERENCES users(id) ON DELETE
     SET NULL,
         created_by INT REFERENCES users(id) ON DELETE
     SET NULL,

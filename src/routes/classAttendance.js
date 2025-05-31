@@ -6,6 +6,7 @@ import { auth } from "../middlewares/index.js";
 const classAttendanceRoute = express.Router();
 
 generateCRUDRoutes(classAttendanceRoute, classAttendanceController);
+// update many without id
 classAttendanceRoute.patch("/", auth, classAttendanceController.update);
 
 export default classAttendanceRoute;
