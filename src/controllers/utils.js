@@ -21,7 +21,7 @@ export const generateCRUD = (model, { isJunctionTable = false, searchFields = ["
         const fields = model.getFields ? model.getFields(req.query.fields) : transformFields(req.query.fields);
 
         const [rows, pager] = await model.find(filterObj, req.pager, req.order, fields);
-        res.status(200).json({ rows, pager });
+        res.status(200).json({ rows, pager, refs: req.refs || null });
       } catch (error) {
         next(error);
       }
@@ -95,7 +95,7 @@ export const generateCRUD = (model, { isJunctionTable = false, searchFields = ["
           return d;
         });
 
-        const updated = await Promise.all(transformed.map((item) => model.updateById(item.id, item)));
+        const updated = await model.updateMany(transformed);
         return res.status(201).json({ updated });
       } catch (error) {
         next(error);
@@ -110,11 +110,11 @@ export const generateCRUD = (model, { isJunctionTable = false, searchFields = ["
 
         if (id) {
           await model.delete(id);
-          return res.status(201).json({ message: "Xóa thành công!" });
+          return res.status(201).json({ message: "Xóa thành công." });
         }
 
         await model.deleteMany(ids.split(","));
-        return res.status(201).json({ message: "Xóa thành công!" });
+        return res.status(201).json({ message: "Xóa thành công." });
       } catch (error) {
         next(error);
       }

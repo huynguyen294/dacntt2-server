@@ -97,31 +97,30 @@ export const generateCommonServices = (tableName) => {
       }
     }),
 
+    // replace
     updateMany: keyConvertWrapper(async (list = []) => {
       try {
         await pgDB.query("BEGIN");
-        const values = list.map((u) => u.id);
-        const fields = list.reduce((acc, data) => {
-          Object.keys(data).forEach((field) => field !== "id" && !acc.includes(field) && acc.push(field));
-          return acc;
-        }, []);
 
-        let query = `UPDATE ${tableName} SET `;
-        const listCase = fields.map((field) => {
-          let caseStr = "";
-          list.forEach((item, index) => {
-            values.push(item[field] || null);
-            caseStr += ` WHEN id = $${index + 1} THEN $${values.length} `;
-          });
-          return ` ${field} = CASE ${caseStr} END `;
-        });
-        query += listCase.join(",");
+        const rows = await Promise.all(
+          list.map(async ({ id, ...item }) => {
+            const fields = Object.keys(item);
 
-        console.log("updateMany:", query, values);
-        const result = await pgDB.query(query, values);
+            const valuesStr = fields.map((f, index) => `${f} = $${index + 1}`).join(", ");
+            const values = fields.map((f) => item[f] || null);
+            values.push(id);
+
+            const query = `UPDATE ${tableName} SET ${valuesStr} WHERE id = $${values.length} RETURNING *`;
+            console.log("updateById:", query, values);
+
+            const result = await pgDB.query(query, values);
+            return result.rows[0];
+          })
+        );
+
         await pgDB.query("COMMIT");
 
-        return result.rows;
+        return rows;
       } catch (error) {
         await pgDB.query("ROLLBACK");
         throw error;
@@ -209,6 +208,7 @@ export const generateCommonServices = (tableName) => {
     }),
 
     countBy: keyConvertWrapper(async (countBy, filter = {}) => {
+      if (Array.isArray(countBy)) countBy = countBy.join(", ");
       const { filterStr, values } = generateFilterString(filter);
       const query = `SELECT ${countBy}, COUNT(*) AS total FROM ${tableName} ${filterStr} GROUP BY ${countBy}`;
 
