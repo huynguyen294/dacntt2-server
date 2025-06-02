@@ -7,8 +7,6 @@ import { checkLessons, getWithRefs } from "../controllers/attendance.js";
 const classAttendanceRoute = express.Router();
 
 generateCRUDRoutes(classAttendanceRoute, classAttendanceController, { middlewares: { get: [getWithRefs] } });
-// update many without id
-classAttendanceRoute.patch("/", auth, classAttendanceController.update);
 classAttendanceRoute.get("/check-lessons/:classId", auth, checkLessons);
 
 export default classAttendanceRoute;

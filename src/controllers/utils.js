@@ -21,7 +21,10 @@ export const generateCRUD = (model, { isJunctionTable = false, searchFields = ["
         const fields = model.getFields ? model.getFields(req.query.fields) : transformFields(req.query.fields);
 
         const [rows, pager] = await model.find(filterObj, req.pager, req.order, fields);
-        res.status(200).json({ rows, pager, refs: req.refs || null });
+        const result = { rows };
+        if (req.refs) result.refs = req.refs;
+        if (req.pager) result.pager = pager;
+        res.status(200).json(result);
       } catch (error) {
         next(error);
       }

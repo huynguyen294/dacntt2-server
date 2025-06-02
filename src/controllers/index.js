@@ -8,6 +8,7 @@ import {
   courseModel,
   enrollmentModel,
   examModel,
+  exerciseScoreModel,
   shiftModel,
   studentConsultationModel,
   studentExamModel,
@@ -15,6 +16,10 @@ import {
 } from "../models/index.js";
 import { generateCRUD } from "./utils.js";
 import otherUserControllers from "./user.js";
+
+// userModel
+const commonUserCRUD = generateCRUD(userModel, { searchFields: ["name", "email", "phoneNumber"] });
+export const userController = { ...commonUserCRUD, ...otherUserControllers };
 
 // certificate
 const commonCertificateCRUD = generateCRUD(certificateModel);
@@ -64,6 +69,6 @@ export const classTopicController = commonClassTopicCRUD;
 const commonClassAttendanceCRUD = generateCRUD(classAttendanceModel, []);
 export const classAttendanceController = commonClassAttendanceCRUD;
 
-// userModel
-const commonUserCRUD = generateCRUD(userModel, { searchFields: ["name", "email", "phoneNumber"] });
-export const userController = { ...commonUserCRUD, ...otherUserControllers };
+// classAttendance
+const commonExerciseScoreCRUD = generateCRUD(exerciseScoreModel, []);
+export const classExerciseScoreController = commonExerciseScoreCRUD;

@@ -14,6 +14,7 @@ import classScheduleRoute from "./classSchedule.js";
 import classExerciseRoute from "./classExercise.js";
 import classTopicRoute from "./classTopic.js";
 import classAttendanceRoute from "./classAttendance.js";
+import classExerciseScoreRoute from "./exerciseScore.js";
 
 const route = (app) => {
   app.use("/api-v1/auth", authRoute);
@@ -29,6 +30,7 @@ const route = (app) => {
   app.use("/api-v1/student-consultation", studentConsultationRoute);
   app.use("/api-v1/class-schedules", classScheduleRoute);
   app.use("/api-v1/class-exercises", classExerciseRoute);
+  app.use("/api-v1/class-exercise-scores", classExerciseScoreRoute);
   app.use("/api-v1/class-topics", classTopicRoute);
   app.use("/api-v1/class-attendances", classAttendanceRoute);
   app.use("/api-v1/db", dbRoute);

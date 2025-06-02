@@ -212,7 +212,7 @@ CREATE TABLE IF NOT EXISTS class_schedules (
     SET NULL,
         created_by INT REFERENCES users(id) ON DELETE
     SET NULL,
-        UNIQUE ("date", "class_id")
+        UNIQUE ("date", "class_id", "shift_id")
 );
 CREATE INDEX IF NOT EXISTS idx_class_schedules_class_id ON class_schedules (class_id);
 CREATE INDEX IF NOT EXISTS idx_class_schedules_date ON class_schedules (date);
@@ -245,6 +245,23 @@ CREATE TABLE IF NOT EXISTS class_exercises (
     SET NULL
 );
 CREATE INDEX IF NOT EXISTS idx_class_exercises_class_id ON class_exercises (class_id);
+CREATE TABLE IF NOT EXISTS class_exercise_scores (
+    id SERIAL PRIMARY KEY,
+    score INT,
+    status VARCHAR(255),
+    exercise_id INT REFERENCES class_exercises(id) ON DELETE CASCADE,
+    class_id INT REFERENCES classes(id) ON DELETE CASCADE,
+    student_id INT REFERENCES users(id) ON DELETE CASCADE,
+    last_updated_at TIMESTAMPTZ DEFAULT NOW(),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    last_updated_by INT REFERENCES users(id) ON DELETE
+    SET NULL,
+        created_by INT REFERENCES users(id) ON DELETE
+    SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_class_exercise_scores_class_id ON class_exercise_scores (class_id);
+CREATE INDEX IF NOT EXISTS idx_class_exercise_scores_exercise_id ON class_exercise_scores (exercise_id);
+CREATE INDEX IF NOT EXISTS idx_class_exercise_scores_student_id ON class_exercise_scores (student_id);
 -- create table class_attendances if not exits;
 CREATE TABLE IF NOT EXISTS class_attendances (
     id SERIAL PRIMARY KEY,
