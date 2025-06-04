@@ -4,7 +4,8 @@ import { generateCRUDRoutes } from "./utils.js";
 import { studentConsultationMiddlewares } from "../controllers/studentConsultation.js";
 
 const studentConsultationRoute = express.Router();
-generateCRUDRoutes(studentConsultationRoute, studentConsultationController, {
+generateCRUDRoutes(studentConsultationController, {
+  router: studentConsultationRoute,
   middlewares: studentConsultationMiddlewares,
 });
 

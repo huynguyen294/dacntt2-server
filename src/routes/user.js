@@ -12,6 +12,6 @@ userRoute.get("/forgot-password/:email", userController.forgotPassword);
 userRoute.patch("/reset-password/:email", userController.resetPassword);
 userRoute.get("/verify-reset-password-code/:email/:code", userController.verifyResetPasswordCode);
 // crud
-generateCRUDRoutes(userRoute, userController, { middlewares: userMiddlewares });
+generateCRUDRoutes(userController, { middlewares: userMiddlewares, router: userRoute });
 
 export default userRoute;

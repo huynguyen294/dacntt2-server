@@ -9,6 +9,7 @@ import {
   enrollmentModel,
   examModel,
   exerciseScoreModel,
+  infoSheetModel,
   shiftModel,
   studentConsultationModel,
   studentExamModel,
@@ -16,6 +17,9 @@ import {
 } from "../models/index.js";
 import { generateCRUD } from "./utils.js";
 import otherUserControllers from "./user.js";
+
+// infoSheet
+export const infoSheetController = generateCRUD(infoSheetModel, { searchFields: [] });
 
 // userModel
 const commonUserCRUD = generateCRUD(userModel, { searchFields: ["name", "email", "phoneNumber"] });
@@ -66,9 +70,9 @@ const commonClassTopicCRUD = generateCRUD(classTopicModel, { isJunctionTable: tr
 export const classTopicController = commonClassTopicCRUD;
 
 // classAttendance
-const commonClassAttendanceCRUD = generateCRUD(classAttendanceModel, []);
+const commonClassAttendanceCRUD = generateCRUD(classAttendanceModel, { searchFields: [] });
 export const classAttendanceController = commonClassAttendanceCRUD;
 
-// classAttendance
-const commonExerciseScoreCRUD = generateCRUD(exerciseScoreModel, []);
+// ExerciseScore
+const commonExerciseScoreCRUD = generateCRUD(exerciseScoreModel, { searchFields: [] });
 export const classExerciseScoreController = commonExerciseScoreCRUD;

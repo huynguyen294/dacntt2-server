@@ -14,3 +14,4 @@ export { default as classExerciseModel } from "./classExercise.js";
 export { default as classTopicModel } from "./classTopic.js";
 export { default as classAttendanceModel } from "./classAttendance.js";
 export { default as exerciseScoreModel } from "./exerciseScoreModel.js";
+export { default as infoSheetModel } from "./infoSheet.js";

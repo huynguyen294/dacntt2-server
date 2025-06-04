@@ -329,3 +329,14 @@ CREATE TABLE IF NOT EXISTS student_exam (
         created_by INT REFERENCES users(id) ON DELETE
     SET NULL
 );
+CREATE INDEX IF NOT EXISTS idx_student_exam_exam_id ON student_exam (exam_id);
+CREATE INDEX IF NOT EXISTS idx_student_exam_student_id ON student_exam (student_id);
+--;
+-- create table student_exam if not exits;
+CREATE TABLE IF NOT EXISTS info_sheet (
+    id BOOLEAN PRIMARY KEY DEFAULT TRUE CHECK (id),
+    content TEXT NOT NULL,
+    last_updated_at TIMESTAMPTZ DEFAULT NOW(),
+    last_updated_by INT REFERENCES users(id) ON DELETE
+    SET NULL
+);

@@ -6,6 +6,6 @@ import { auth } from "../middlewares/index.js";
 
 const classRoute = express.Router();
 classRoute.get("/:id/students", auth, getClassStudents);
-generateCRUDRoutes(classRoute, classController, { middlewares: classMiddleWares });
+generateCRUDRoutes(classController, { middlewares: classMiddleWares, router: classRoute });
 
 export default classRoute;

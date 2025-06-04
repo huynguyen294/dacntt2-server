@@ -5,8 +5,7 @@ import { auth } from "../middlewares/index.js";
 import { checkLessons, getWithRefs } from "../controllers/attendance.js";
 
 const classAttendanceRoute = express.Router();
-
-generateCRUDRoutes(classAttendanceRoute, classAttendanceController, { middlewares: { get: [getWithRefs] } });
+generateCRUDRoutes(classAttendanceController, { middlewares: { get: [getWithRefs] }, router: classAttendanceRoute });
 classAttendanceRoute.get("/check-lessons/:classId", auth, checkLessons);
 
 export default classAttendanceRoute;

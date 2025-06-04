@@ -1,3 +1,4 @@
+import express from "express";
 import { auth } from "../middlewares/index.js";
 
 const defaultController = { get: () => {}, create: () => {}, getById: () => {}, update: () => {}, delete: () => {} };
@@ -5,8 +6,9 @@ const defaultOptions = {
   middlewares: { get: [auth], create: [auth], getById: [auth], update: [auth], delete: [auth] },
 };
 
-export const generateCRUDRoutes = (router, controller = defaultController, options = defaultOptions) => {
-  const { middlewares = defaultOptions.middlewares } = options;
+export const generateCRUDRoutes = (controller = defaultController, options = defaultOptions) => {
+  const { middlewares = defaultOptions.middlewares, router = express.Router() } = options;
+
   const {
     get: getMiddlewares = defaultOptions.middlewares.get,
     create: createMiddlewares = defaultOptions.middlewares.create,
@@ -23,4 +25,6 @@ export const generateCRUDRoutes = (router, controller = defaultController, optio
   router.patch("/", ...updateMiddlewares, controller.update);
   router.delete("/:id", ...deleteMiddlewares, controller.delete);
   router.delete("/", ...deleteMiddlewares, controller.delete);
+
+  return router;
 };

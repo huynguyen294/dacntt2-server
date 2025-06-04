@@ -7,7 +7,7 @@ import { auth } from "../middlewares/index.js";
 const classExerciseScoreRoute = express.Router();
 
 // CRUD
-generateCRUDRoutes(classExerciseScoreRoute, classExerciseScoreController);
+generateCRUDRoutes(classExerciseScoreController, { router: classExerciseScoreRoute });
 // others
 classExerciseScoreRoute.get("/student-statuses/:classId", auth, studentStatuses);
 
