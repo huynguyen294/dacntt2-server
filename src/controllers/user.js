@@ -180,7 +180,7 @@ const verifyResetPasswordCode = async (req, res, next) => {};
 //[PATCH] /users/reset-password/:email
 const resetPassword = async (req, res, next) => {};
 
-// [GET] /users?refs=true
+// [GET] /users?role=true
 const getUsersWithRole = async (req, res, next) => {
   const { role, refFields = ":basic" } = req.query;
 
