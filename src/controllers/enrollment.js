@@ -23,7 +23,7 @@ const createManyEnrollment = async (req, res, next) => {
 };
 
 export const enrollmentMiddleWares = {
-  get: [auth, roles(["admin", "consultant", "finance-officer"])],
+  get: [auth],
   create: [auth, roles(["admin", "consultant", "finance-officer"]), createManyEnrollment],
   delete: [auth, roles(["admin", "consultant", "finance-officer"])],
   update: [auth, roles(["admin", "consultant", "finance-officer"])],

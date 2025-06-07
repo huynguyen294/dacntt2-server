@@ -1,6 +1,7 @@
+import pgDB from "../configs/db.js";
 import { ORDER, PAGER } from "../constants/index.js";
 import { transformFields } from "../utils/index.js";
-import { generateCommonServices } from "./utils.js";
+import { generateCommonServices, generateFieldsStr, generateOrderStr, keyConvertWrapper } from "./utils.js";
 
 export const defaultClassSchedule = {
   id: null,
@@ -20,10 +21,30 @@ export const defaultClassSchedule = {
 const commonServices = generateCommonServices("class_schedules");
 
 // other services
+const getByStudents = keyConvertWrapper(async (studentIds, pager = null, order = ORDER, fields = []) => {
+  const fieldsStr = generateFieldsStr(fields, "s");
+  const orderStr = generateOrderStr(order, "s");
+
+  const query = `
+  SELECT ${fieldsStr}
+  FROM class_schedules s
+  JOIN classes c ON s.class_id = c.id 
+  JOIN enrollments e ON e.class_id = c.id 
+  WHERE e.student_id = ANY($1)
+  ${orderStr}
+  `;
+
+  const values = [studentIds];
+
+  console.log("findStudentSchedules:", query, values);
+  const result = await pgDB.query(query, values);
+  return result.rows;
+});
 
 // model
 const courseModel = {
   ...commonServices,
+  getByStudents,
   // field suggestion for find funcs
   find: async (filter = defaultClassSchedule, pager = PAGER, order = ORDER, fields = []) => {
     return commonServices.find(filter, pager, order, fields);

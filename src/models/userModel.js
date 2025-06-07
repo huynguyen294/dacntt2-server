@@ -100,6 +100,27 @@ const findEmployeeById = keyConvertWrapper(async (id, employeeFields) => {
 const getFields = (type) =>
   transformFields(type, { basicFields: ["id", "name", "email", "role", "image_url"], defaultObject });
 
+const getTeachersByStudents = keyConvertWrapper(
+  async (studentIds, pager = null, order = ORDER, fields = getFields(":basic")) => {
+    const fieldsStr = generateFieldsStr(fields, "u");
+    // const orderStr = generateOrderStr(order, "u");
+
+    const query = `
+    SELECT DISTINCT ${fieldsStr}
+    FROM users u
+    JOIN class_schedules s ON u.id = s.teacher_id  
+    JOIN enrollments e ON s.class_id = e.class_id
+    WHERE e.student_id = ANY($1)
+    `;
+
+    const values = [studentIds];
+
+    console.log("getTeachersByStudents:", query, values);
+    const result = await pgDB.query(query, values);
+    return result.rows;
+  }
+);
+
 // model
 const userModel = {
   ...commonServices,
@@ -117,6 +138,7 @@ const userModel = {
   getFields,
   findEmployee,
   findEmployeeById,
+  getTeachersByStudents,
 };
 
 export default userModel;

@@ -20,6 +20,8 @@ import {
   studentExamController,
 } from "../controllers/index.js";
 import { enrollmentMiddleWares } from "../controllers/enrollment.js";
+import { auth } from "../middlewares/index.js";
+import { getMainStudentData, getOtherStudentData } from "../controllers/student.js";
 
 const route = (app) => {
   app.use("/api-v1/auth", authRoute);
@@ -39,6 +41,8 @@ const route = (app) => {
   app.use("/api-v1/class-schedules", generateCRUDRoutes(classScheduleController));
   app.use("/api-v1/class-topics", generateCRUDRoutes(classTopicController));
   app.use("/api-v1/info-sheet", generateCRUDRoutes(infoSheetController));
+  app.get("/api-v1/student-data/main/:id", auth, getMainStudentData);
+  app.get("/api-v1/student-data/other/:id", auth, getOtherStudentData);
   app.use("/api-v1/db", dbRoute);
   app.use((req, res, next) => {
     res.send("Không tìm thấy đường dẫn!");
