@@ -23,3 +23,27 @@ const PERMISSION_BY_ROLES = {
 };
 
 export const checkRoles = (userRole, role) => PERMISSION_BY_ROLES[userRole].includes(role);
+
+export const COURSE_LEVELS = {
+  1: "Sơ cấp",
+  2: "Trung cấp",
+  3: "Nâng cao",
+};
+
+export const CERTIFICATE_STATUSES = {
+  active: "Hoạt động",
+  onHold: "Tạm dừng",
+  stopped: "Hết hạn",
+};
+
+export const COURSE_STATUSES = {
+  active: "Đang mở",
+  onHold: "Tạm đóng",
+  stopped: "Không còn mở",
+};
+
+export const EMPLOYEE_STATUS = {
+  active: "Đang làm việc",
+  onHold: "Tạm nghỉ việc",
+  stopped: "Đã nghỉ việc",
+};

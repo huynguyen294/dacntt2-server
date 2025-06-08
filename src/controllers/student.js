@@ -1,8 +1,11 @@
+import { COURSE_STATUSES } from "../constants/index.js";
 import {
   classAttendanceModel,
   classExerciseModel,
   classModel,
   classScheduleModel,
+  classTopicModel,
+  courseModel,
   exerciseScoreModel,
   shiftModel,
   userModel,
@@ -29,13 +32,15 @@ export const getOtherStudentData = async (req, res, next) => {
   const { id } = req.params;
 
   try {
-    const [attendances, classExercises, [classExerciseScores], tuitions] = await Promise.all([
+    const [attendances, classExercises, [classExerciseScores], [courses], classTopics] = await Promise.all([
       classAttendanceModel.countBy(["studentId", "classId", "attend"], { studentId: id }),
       classExerciseModel.getByStudents([id], null, req.order),
       exerciseScoreModel.find({ studentId: id }),
+      courseModel.find({ status: COURSE_STATUSES.active }),
+      classTopicModel.getByStudents([id], null, req.order),
     ]);
 
-    res.status(200).json({ attendances, classExercises, classExerciseScores, tuitions });
+    res.status(200).json({ attendances, classExercises, classExerciseScores, courses, classTopics, tuitions: [] });
   } catch (error) {
     next(error);
   }
