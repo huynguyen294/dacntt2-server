@@ -86,9 +86,9 @@ const createAccount = async (req, res, next) => {
 };
 
 export const studentConsultationMiddlewares = {
-  get: [auth, roles(["admin", "consultant", "finance-officer"]), getStudentWithRefs],
-  create: [auth, roles(["admin", "consultant", "finance-officer"]), createAccount],
+  get: [auth, getStudentWithRefs],
+  create: [auth, createAccount],
+  getById: [auth],
   update: [auth, roles(["admin", "consultant", "finance-officer"]), createAccount],
   delete: [auth, roles(["admin", "consultant", "finance-officer"])],
-  getById: [auth, roles(["admin", "consultant", "finance-officer"])],
 };

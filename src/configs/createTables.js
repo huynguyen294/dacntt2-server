@@ -1,8 +1,8 @@
-import pgDB from "../configs/db.js";
 import fs from "fs";
+import pgDB from "./db.js";
 
 const createTables = () => {
-  const query = fs.readFileSync("./src/models/createTables.sql", "utf8");
+  const query = fs.readFileSync("./src/configs/createTables.sql", "utf8");
 
   try {
     pgDB.query(query);

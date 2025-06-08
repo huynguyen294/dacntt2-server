@@ -8,6 +8,7 @@ import {
   courseModel,
   exerciseScoreModel,
   shiftModel,
+  studentConsultationModel,
   userModel,
 } from "../models/index.js";
 
@@ -32,15 +33,19 @@ export const getOtherStudentData = async (req, res, next) => {
   const { id } = req.params;
 
   try {
-    const [attendances, classExercises, [classExerciseScores], [courses], classTopics] = await Promise.all([
-      classAttendanceModel.countBy(["studentId", "classId", "attend"], { studentId: id }),
-      classExerciseModel.getByStudents([id], null, req.order),
-      exerciseScoreModel.find({ studentId: id }),
-      courseModel.find({ status: COURSE_STATUSES.active }),
-      classTopicModel.getByStudents([id], null, req.order),
-    ]);
+    const [attendances, classExercises, [classExerciseScores], [courses], classTopics, [consultations]] =
+      await Promise.all([
+        classAttendanceModel.countBy(["studentId", "classId", "attend"], { studentId: id }),
+        classExerciseModel.getByStudents([id], null, req.order),
+        exerciseScoreModel.find({ studentId: id }),
+        courseModel.find({ status: COURSE_STATUSES.active }),
+        classTopicModel.getByStudents([id], null, req.order),
+        studentConsultationModel.find({ studentId: id }, null, req.order),
+      ]);
 
-    res.status(200).json({ attendances, classExercises, classExerciseScores, courses, classTopics, tuitions: [] });
+    res
+      .status(200)
+      .json({ attendances, classExercises, classExerciseScores, courses, classTopics, consultations, tuitions: [] });
   } catch (error) {
     next(error);
   }

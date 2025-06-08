@@ -4,7 +4,7 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import route from "./routes/index.js";
 import dotenv from "dotenv";
-import createTables from "./models/createTables.js";
+import createTables from "./configs/createTables.js";
 // import generateDummyUser from "./scripts/generateDummyUser.js";
 import { errorHandler, pagerAndOrder } from "./middlewares/index.js";
 
