@@ -2,6 +2,8 @@ import mapKeys from "lodash/mapKeys.js";
 import snakeCase from "lodash/snakeCase.js";
 import camelCase from "lodash/camelCase.js";
 
+export const displayDate = (value) => (value ? format(new Date(value), "dd-MM-yyyy") : "");
+
 export const convertToSnakeShallow = (value) => {
   if (!value) return null;
   if (typeof value !== "object") return snakeCase(value);

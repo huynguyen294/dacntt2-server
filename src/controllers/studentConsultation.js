@@ -62,11 +62,6 @@ const createAccount = async (req, res, next) => {
     const hashedPassword = await bcrypt.hash(userData.password, 12);
     userData.password = hashedPassword;
     userData.created_by = req.userId;
-    const created = await userModel.create(userData);
-    req.body.studentId = created.id;
-    delete req.body.password;
-
-    next();
 
     await sendMail({
       subject: "Cấp tài khoản thành công",
@@ -80,6 +75,12 @@ const createAccount = async (req, res, next) => {
       <p><strong>Lưu ý</strong>: Đây là mật khẩu mặc định, bạn có thể thay đổi ở phần 'Hồ sơ cá nhân' để bảo mật tài khoản.</p>
       </div>`,
     });
+
+    const created = await userModel.create(userData);
+    req.body.studentId = created.id;
+    delete req.body.password;
+
+    next();
   } catch (error) {
     next(error);
   }

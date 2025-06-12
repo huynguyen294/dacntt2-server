@@ -6,9 +6,14 @@ const auth = { user: process.env.APP_EMAIL, pass: process.env.APP_EMAIL_PASSWORD
 const transporter = nodemailer.createTransport({ service: "gmail", auth });
 export const sendMail = async ({ subject, html, email }) => {
   const mailOptions = { to: email, from: process.env.APP_EMAIL, subject, html };
-  await transporter.sendMail(mailOptions, (error, info) => {
-    console.log(error);
-    if (error) throw new Error("Gửi mail thất bại");
+  await new Promise((res, rej) => {
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (!error) {
+        console.log(`Gửi mail thành công đến ${email}: ${info?.response}`);
+        res(`Gửi mail thành công!`);
+      }
+      rej(`Gửi mail thất bại: ${error.message}`);
+    });
   });
 };
 
