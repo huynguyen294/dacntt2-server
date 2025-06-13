@@ -42,7 +42,7 @@ const getByStudents = keyConvertWrapper(async (studentIds, pager = null, order =
 });
 
 // model
-const courseModel = {
+const classScheduleModel = {
   ...commonServices,
   getByStudents,
   // field suggestion for find funcs
@@ -62,4 +62,4 @@ const courseModel = {
     }),
 };
 
-export default courseModel;
+export default classScheduleModel;

@@ -1,8 +1,15 @@
 import mapKeys from "lodash/mapKeys.js";
 import snakeCase from "lodash/snakeCase.js";
 import camelCase from "lodash/camelCase.js";
+import { format } from "date-fns";
 
 export const displayDate = (value) => (value ? format(new Date(value), "dd-MM-yyyy") : "");
+export const displayDay = (value) => {
+  if (!value) return "";
+  const date = new Date(value);
+  const day = date.getDay();
+  return day === 0 ? "chủ nhật" : `thứ ${day + 1}`;
+};
 
 export const convertToSnakeShallow = (value) => {
   if (!value) return null;

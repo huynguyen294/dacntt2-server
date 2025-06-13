@@ -8,7 +8,7 @@ import {
   userModel,
 } from "../models/index.js";
 import { checkDuplicateForTeacher, generateClassSchedules } from "../utils/schedule.js";
-import { arrayToObject, displayDate, transformQueryToFilterObject } from "../utils/index.js";
+import { arrayToObject, displayDate, displayDay, transformQueryToFilterObject } from "../utils/index.js";
 
 // [GET] /classes/:id/students
 export const getClassStudents = async (req, res, next) => {
@@ -109,6 +109,29 @@ const createClassWithSchedules = async (req, res, next) => {
   }
 };
 
+const checkDuplicateScheduleBeforeCreate = async (req, res, next) => {
+  try {
+    const data = req.body;
+    const teacherId = data.teacherId;
+    const newSchedules = generateClassSchedules(data, req);
+    const duplicated = await checkDuplicateForTeacher(teacherId, newSchedules);
+    if (!duplicated) return next();
+
+    const message = `Giáo viên trùng lịch ${displayDay(duplicated.date)} ngày ${displayDate(duplicated.date)}`;
+    return res.status(400).json({ message, duplicated });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const classMiddleWares = {
+  get: [auth, getClassWithRefs],
+  create: [auth, checkDuplicateScheduleBeforeCreate, createClassWithSchedules],
+  delete: [auth],
+  update: [auth],
+  getById: [auth, getClassByIdWithRefs],
+};
+
 // const dev = async (req, res, next) => {
 //   try {
 //     const [rows] = await classModel.find();
@@ -125,43 +148,3 @@ const createClassWithSchedules = async (req, res, next) => {
 //     next(error);
 //   }
 // };
-
-const checkDuplicateScheduleBeforeCreate = async (req, res, next) => {
-  try {
-    const data = req.body;
-    const teacherId = data.teacherId;
-    const newSchedules = generateClassSchedules(data, req);
-    const duplicated = await checkDuplicateForTeacher(teacherId, newSchedules);
-    if (!duplicated) return next();
-
-    const message = `Giáo viên trùng lịch ngày ${displayDate(duplicated.date)}`;
-    return res.status(400).json({ message, duplicated });
-  } catch (error) {
-    next(error);
-  }
-};
-
-const checkDuplicateScheduleBeforeUpdate = async (req, res, next) => {
-  const { id } = req.params;
-  try {
-    const teacherId = req.body.teacherId;
-    const [newTeacherSchedules] = await classScheduleModel.find({ classId: id });
-    const duplicated = await checkDuplicateForTeacher(teacherId, newTeacherSchedules);
-
-    return res.json({ duplicated });
-    if (!duplicated) return next();
-
-    const message = `Giáo viên trùng lịch ngày ${displayDate(duplicated.date)}`;
-    return res.status(400).json({ message, duplicated });
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const classMiddleWares = {
-  get: [auth, getClassWithRefs],
-  create: [auth, createClassWithSchedules],
-  delete: [auth],
-  update: [auth],
-  getById: [auth, getClassByIdWithRefs],
-};

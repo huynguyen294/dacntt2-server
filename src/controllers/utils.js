@@ -73,7 +73,7 @@ export const generateCRUD = (model, { isJunctionTable = false, searchFields = ["
       try {
         const item = await model.findById(id);
         if (!item) return res.status(404).json({ message: "Không tìm thấy kết quả!" });
-        res.status(201).json({ item });
+        res.status(200).json({ item });
       } catch (error) {
         next(error);
       }
@@ -92,7 +92,7 @@ export const generateCRUD = (model, { isJunctionTable = false, searchFields = ["
           }
 
           const updated = await model.updateById(id, data);
-          return res.status(201).json({ updated });
+          return res.status(200).json({ updated });
         }
 
         const transformed = data[model.tableName].map((d) => {
@@ -104,7 +104,7 @@ export const generateCRUD = (model, { isJunctionTable = false, searchFields = ["
         });
 
         const updated = await model.updateMany(transformed);
-        return res.status(201).json({ updated });
+        return res.status(200).json({ updated });
       } catch (error) {
         next(error);
       }
@@ -118,11 +118,11 @@ export const generateCRUD = (model, { isJunctionTable = false, searchFields = ["
 
         if (id) {
           await model.delete(id);
-          return res.status(201).json({ message: "Xóa thành công." });
+          return res.status(204).send();
         }
 
         await model.deleteMany(ids.split(","));
-        return res.status(201).json({ message: "Xóa thành công." });
+        return res.status(204).send();
       } catch (error) {
         next(error);
       }
