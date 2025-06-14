@@ -102,21 +102,20 @@ export const generateCommonServices = (tableName) => {
       try {
         await pgDB.query("BEGIN");
 
-        const rows = await Promise.all(
-          list.map(async ({ id, ...item }) => {
-            const fields = Object.keys(item);
+        const rows = [];
+        for (const { id, ...item } of list) {
+          const fields = Object.keys(item);
 
-            const valuesStr = fields.map((f, index) => `${f} = $${index + 1}`).join(", ");
-            const values = fields.map((f) => item[f] || null);
-            values.push(id);
+          const valuesStr = fields.map((f, index) => `${f} = $${index + 1}`).join(", ");
+          const values = fields.map((f) => item[f] || null);
+          values.push(id);
 
-            const query = `UPDATE ${tableName} SET ${valuesStr} WHERE id = $${values.length} RETURNING *`;
-            console.log("updateById:", query, values);
+          const query = `UPDATE ${tableName} SET ${valuesStr} WHERE id = $${values.length} RETURNING *`;
+          console.log("updateById:", query, values);
 
-            const result = await pgDB.query(query, values);
-            return result.rows[0];
-          })
-        );
+          const result = await pgDB.query(query, values);
+          rows.push(result.rows[0]);
+        }
 
         await pgDB.query("COMMIT");
 
@@ -329,6 +328,7 @@ export const generateFilterString = (filter) => {
 
 const MAP_OPERATORS = {
   eq: "=",
+  ne: "!=",
   gt: ">",
   gte: ">=",
   lt: "<",
