@@ -13,6 +13,7 @@ import {
   shiftModel,
   studentConsultationModel,
   studentExamModel,
+  tuitionModel,
   userModel,
 } from "../models/index.js";
 import { generateCRUD } from "./utils.js";
@@ -76,3 +77,7 @@ export const classAttendanceController = commonClassAttendanceCRUD;
 // ExerciseScore
 const commonExerciseScoreCRUD = generateCRUD(exerciseScoreModel, { searchFields: [] });
 export const classExerciseScoreController = commonExerciseScoreCRUD;
+
+// Tuition
+const tuitionCRUD = generateCRUD(tuitionModel, { searchFields: ["content"] });
+export const tuitionController = tuitionCRUD;

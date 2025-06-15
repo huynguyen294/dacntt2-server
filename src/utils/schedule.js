@@ -40,7 +40,7 @@ const findDuplicateSchedule = (currentSchedules, newSchedules, shiftObj) => {
   return foundDuplicate;
 };
 
-export const checkDuplicateForStudent = async (studentId, classId) => {
+export const checkDuplicateForStudent = async (studentId, classId, oldClassId) => {
   const [studentSchedules, [newSchedules], [shifts]] = await Promise.all([
     classScheduleModel.getByStudents([studentId], null, null),
     classScheduleModel.find({ classId }, null, null),
@@ -48,7 +48,8 @@ export const checkDuplicateForStudent = async (studentId, classId) => {
   ]);
 
   const shiftObj = arrayToObject(shifts);
-  return findDuplicateSchedule(studentSchedules, newSchedules, shiftObj);
+  const filtered = oldClassId ? studentSchedules.filter((s) => s.classId != oldClassId) : studentSchedules;
+  return findDuplicateSchedule(filtered, newSchedules, shiftObj);
 };
 
 export const checkDuplicateForTeacher = async (teacherId, newSchedules = []) => {

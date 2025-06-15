@@ -17,6 +17,15 @@ DO $$ BEGIN IF NOT EXISTS (
 );
 END IF;
 END $$;
+--;
+-- create table student_exam if not exits;
+CREATE TABLE IF NOT EXISTS info_sheet (
+    id BOOLEAN PRIMARY KEY DEFAULT TRUE CHECK (id),
+    content TEXT NOT NULL,
+    last_updated_at TIMESTAMPTZ DEFAULT NOW(),
+    last_updated_by INT REFERENCES users(id) ON DELETE
+    SET NULL
+);
 -- ;
 -- create table user if not exits;
 CREATE TABLE IF NOT EXISTS users (
@@ -332,11 +341,38 @@ CREATE TABLE IF NOT EXISTS student_exam (
 CREATE INDEX IF NOT EXISTS idx_student_exam_exam_id ON student_exam (exam_id);
 CREATE INDEX IF NOT EXISTS idx_student_exam_student_id ON student_exam (student_id);
 --;
--- create table student_exam if not exits;
-CREATE TABLE IF NOT EXISTS info_sheet (
-    id BOOLEAN PRIMARY KEY DEFAULT TRUE CHECK (id),
-    content TEXT NOT NULL,
+-- create table tuition if not exits;
+CREATE TABLE IF NOT EXISTS tuition (
+    id SERIAL PRIMARY KEY,
+    amount INT NOT NULL,
+    date DATE,
+    content TEXT,
     last_updated_at TIMESTAMPTZ DEFAULT NOW(),
-    last_updated_by INT REFERENCES users(id) ON DELETE
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    student_id INT REFERENCES users(id) ON DELETE
+    SET NULL,
+        class_id INT REFERENCES classes(id) ON DELETE
+    SET NULL,
+        last_updated_by INT REFERENCES users(id) ON DELETE
+    SET NULL,
+        created_by INT REFERENCES users(id) ON DELETE
     SET NULL
 );
+CREATE INDEX IF NOT EXISTS idx_tuition_student_id ON tuition (student_id);
+CREATE INDEX IF NOT EXISTS idx_tuition_class_id ON tuition (class_id);
+--;
+-- create table tuition if not exits;
+CREATE TABLE IF NOT EXISTS tuition_discount (
+    id SERIAL PRIMARY KEY,
+    amount INT NOT NULL,
+    reason TEXT,
+    last_updated_at TIMESTAMPTZ DEFAULT NOW(),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    student_id INT REFERENCES users(id) ON DELETE
+    SET NULL,
+        last_updated_by INT REFERENCES users(id) ON DELETE
+    SET NULL,
+        created_by INT REFERENCES users(id) ON DELETE
+    SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_tuition_student_id ON tuition_discount (student_id);

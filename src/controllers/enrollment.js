@@ -42,10 +42,13 @@ const createManyEnrollment = async (req, res, next) => {
   }
 };
 
-const checkScheduleBeforeCreateOne = async (req, res, next) => {
+const checkSchedule = async (req, res, next) => {
+  if (req.body.enrollments?.length) return next();
+
   try {
-    const { studentId, classId } = req.body;
-    const duplicated = await checkDuplicateForStudent(studentId, classId);
+    const { studentId, classId, oldClassId } = req.body;
+    const duplicated = await checkDuplicateForStudent(studentId, classId, oldClassId);
+    delete req.body.oldClassId;
     if (!duplicated) return next();
 
     const message = `Học viên trùng lịch ${displayDay(duplicated.date)} ngày ${displayDate(duplicated.date)}`;
@@ -57,8 +60,8 @@ const checkScheduleBeforeCreateOne = async (req, res, next) => {
 
 export const enrollmentMiddleWares = {
   get: [auth],
-  create: [auth, roles(["admin", "consultant", "finance-officer"]), createManyEnrollment, checkScheduleBeforeCreateOne],
+  create: [auth, roles(["admin", "consultant", "finance-officer"]), createManyEnrollment, checkSchedule],
   delete: [auth, roles(["admin", "consultant", "finance-officer"])],
-  update: [auth, roles(["admin", "consultant", "finance-officer"])],
+  update: [auth, roles(["admin", "consultant", "finance-officer"]), checkSchedule],
   getById: [auth, roles(["admin", "consultant", "finance-officer"])],
 };
