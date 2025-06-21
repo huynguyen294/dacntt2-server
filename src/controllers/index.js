@@ -13,6 +13,7 @@ import {
   shiftModel,
   studentConsultationModel,
   studentExamModel,
+  tuitionDiscountModel,
   tuitionModel,
   userModel,
 } from "../models/index.js";
@@ -23,7 +24,7 @@ import otherUserControllers from "./user.js";
 export const infoSheetController = generateCRUD(infoSheetModel, { searchFields: [] });
 
 // userModel
-const commonUserCRUD = generateCRUD(userModel, { searchFields: ["name", "email", "phoneNumber"] });
+const commonUserCRUD = generateCRUD(userModel, { searchFields: ["id", "name", "email", "phoneNumber"] });
 export const userController = { ...commonUserCRUD, ...otherUserControllers };
 
 // certificate
@@ -81,3 +82,7 @@ export const classExerciseScoreController = commonExerciseScoreCRUD;
 // Tuition
 const tuitionCRUD = generateCRUD(tuitionModel, { searchFields: ["content"] });
 export const tuitionController = tuitionCRUD;
+
+// Tuition
+const tuitionDiscountCRUD = generateCRUD(tuitionDiscountModel, { searchFields: [] });
+export const tuitionDiscountController = tuitionDiscountCRUD;

@@ -98,7 +98,7 @@ const findEmployeeById = keyConvertWrapper(async (id, employeeFields) => {
 });
 
 const getFields = (type) =>
-  transformFields(type, { basicFields: ["id", "name", "email", "role", "image_url"], defaultObject });
+  transformFields(type, { basicFields: ["id", "name", "email", "role", "phoneNumber", "image_url"], defaultObject });
 
 const getTeachersByStudents = keyConvertWrapper(
   async (studentIds, pager = null, order = ORDER, fields = getFields(":basic")) => {

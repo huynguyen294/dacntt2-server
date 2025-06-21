@@ -15,3 +15,4 @@ export { default as classAttendanceModel } from "./classAttendance.js";
 export { default as exerciseScoreModel } from "./exerciseScoreModel.js";
 export { default as infoSheetModel } from "./infoSheet.js";
 export { default as tuitionModel } from "./tuitionModel.js";
+export { default as tuitionDiscountModel } from "./tuitionDiscountModel.js";

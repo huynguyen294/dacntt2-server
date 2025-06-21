@@ -17,7 +17,7 @@ export const sendMail = async ({ subject, html, email }) => {
   });
 };
 
-export const generateCRUD = (model, { isJunctionTable = false, searchFields = ["name"] } = {}) => {
+export const generateCRUD = (model, { isJunctionTable = false, searchFields = ["id", "name"] } = {}) => {
   return {
     // [GET] ${model.tableName}/
     get: async (req, res, next) => {

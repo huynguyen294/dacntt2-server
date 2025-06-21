@@ -19,10 +19,12 @@ import {
   shiftController,
   studentExamController,
   tuitionController,
+  tuitionDiscountController,
 } from "../controllers/index.js";
 import { enrollmentMiddleWares } from "../controllers/enrollment.js";
 import { auth } from "../middlewares/index.js";
 import { getMainStudentData, getOtherStudentData } from "../controllers/student.js";
+import { tuitionMiddleWares } from "../controllers/tuition.js";
 
 const route = (app) => {
   app.use("/api-v1/auth", authRoute);
@@ -42,7 +44,8 @@ const route = (app) => {
   app.use("/api-v1/class-schedules", generateCRUDRoutes(classScheduleController));
   app.use("/api-v1/class-topics", generateCRUDRoutes(classTopicController));
   app.use("/api-v1/info-sheet", generateCRUDRoutes(infoSheetController));
-  app.use("/api-v1/tuition", generateCRUDRoutes(tuitionController));
+  app.use("/api-v1/tuitions", generateCRUDRoutes(tuitionController, { middlewares: tuitionMiddleWares }));
+  app.use("/api-v1/tuition-discounts", generateCRUDRoutes(tuitionDiscountController));
   app.get("/api-v1/student-data/main/:id", auth, getMainStudentData);
   app.get("/api-v1/student-data/other/:id", auth, getOtherStudentData);
   app.use("/api-v1/db", dbRoute);

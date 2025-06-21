@@ -25,12 +25,12 @@ export const convertToCamelShallow = (value) => {
   return mapKeys(value, (_, key) => camelCase(key));
 };
 
-export const transformQueryToFilterObject = (query, searchFields = ["name"]) => {
+export const transformQueryToFilterObject = (query, searchFields = ["id", "name"]) => {
   const { searchQuery, filter } = query;
 
   const filterObj = {};
   if (searchQuery) {
-    filterObj.search = searchFields.map((f) => ({ [snakeCase(f)]: `%${searchQuery}%` }));
+    filterObj.search = searchFields.map((f) => ({ [f === "id" ? "id::text" : snakeCase(f)]: `%${searchQuery}%` }));
   }
 
   if (filter) {
