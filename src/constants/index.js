@@ -90,5 +90,5 @@ export const ID_CODES = () => ({
   [exerciseScoreModel.tableName]: "DS",
   [infoSheetModel.tableName]: "TB",
   [tuitionModel.tableName]: "HP",
-  [tuitionDiscountModel.tableName]: "GG",
+  [tuitionDiscountModel.tableName]: "MG",
 });

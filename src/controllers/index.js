@@ -72,17 +72,17 @@ const commonClassTopicCRUD = generateCRUD(classTopicModel, { isJunctionTable: tr
 export const classTopicController = commonClassTopicCRUD;
 
 // classAttendance
-const commonClassAttendanceCRUD = generateCRUD(classAttendanceModel, { searchFields: [] });
+const commonClassAttendanceCRUD = generateCRUD(classAttendanceModel, { searchFields: ["id"] });
 export const classAttendanceController = commonClassAttendanceCRUD;
 
 // ExerciseScore
-const commonExerciseScoreCRUD = generateCRUD(exerciseScoreModel, { searchFields: [] });
+const commonExerciseScoreCRUD = generateCRUD(exerciseScoreModel, { searchFields: ["id"] });
 export const classExerciseScoreController = commonExerciseScoreCRUD;
 
 // Tuition
-const tuitionCRUD = generateCRUD(tuitionModel, { searchFields: ["content"] });
+const tuitionCRUD = generateCRUD(tuitionModel, { searchFields: ["id", "content"] });
 export const tuitionController = tuitionCRUD;
 
 // Tuition
-const tuitionDiscountCRUD = generateCRUD(tuitionDiscountModel, { searchFields: [] });
+const tuitionDiscountCRUD = generateCRUD(tuitionDiscountModel, { searchFields: ["id", "reason"] });
 export const tuitionDiscountController = tuitionDiscountCRUD;

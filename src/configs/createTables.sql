@@ -347,6 +347,7 @@ CREATE TABLE IF NOT EXISTS tuition (
     amount INT NOT NULL,
     date DATE,
     content TEXT,
+    note TEXT,
     last_updated_at TIMESTAMPTZ DEFAULT NOW(),
     created_at TIMESTAMPTZ DEFAULT NOW(),
     student_id INT REFERENCES users(id) ON DELETE
@@ -368,11 +369,14 @@ CREATE TABLE IF NOT EXISTS tuition_discount (
     reason TEXT,
     last_updated_at TIMESTAMPTZ DEFAULT NOW(),
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    student_id INT REFERENCES users(id) ON DELETE
+    class_id INT REFERENCES classes(id) ON DELETE
+    SET NULL,
+        student_id INT REFERENCES users(id) ON DELETE
     SET NULL,
         last_updated_by INT REFERENCES users(id) ON DELETE
     SET NULL,
         created_by INT REFERENCES users(id) ON DELETE
     SET NULL
 );
-CREATE INDEX IF NOT EXISTS idx_tuition_student_id ON tuition_discount (student_id);
+CREATE INDEX IF NOT EXISTS idx_tuition_discount_student_id ON tuition_discount (student_id);
+CREATE INDEX IF NOT EXISTS idx_tuition_discount_class_id ON tuition_discount (class_id);
