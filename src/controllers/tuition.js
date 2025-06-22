@@ -1,3 +1,4 @@
+import { DEFAULT_SEARCH_FIELDS } from "../constants/index.js";
 import { auth } from "../middlewares/index.js";
 import { classModel, tuitionModel, userModel } from "../models/index.js";
 import { arrayToObject, transformQueryToFilterObject } from "../utils/index.js";
@@ -7,7 +8,7 @@ export const getWithRefs = async (req, res, next) => {
     const { refs } = req.query;
     if (refs !== "true") return next();
     const { refFields = ":basic" } = req.query;
-    const filterObj = transformQueryToFilterObject(req.query);
+    const filterObj = transformQueryToFilterObject(req.query, ["id", "content"], tuitionModel.tableName);
     const [rows, pager] = await tuitionModel.find(filterObj, req.pager, req.order);
 
     const refData = {};

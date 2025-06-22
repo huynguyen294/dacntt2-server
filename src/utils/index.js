@@ -2,6 +2,7 @@ import mapKeys from "lodash/mapKeys.js";
 import snakeCase from "lodash/snakeCase.js";
 import camelCase from "lodash/camelCase.js";
 import { format } from "date-fns";
+import { DEFAULT_SEARCH_FIELDS, ID_CODES } from "../constants/index.js";
 
 export const displayDate = (value) => (value ? format(new Date(value), "dd-MM-yyyy") : "");
 export const displayDay = (value) => {
@@ -25,12 +26,24 @@ export const convertToCamelShallow = (value) => {
   return mapKeys(value, (_, key) => camelCase(key));
 };
 
-export const transformQueryToFilterObject = (query, searchFields = ["id", "name"]) => {
+const isNumeric = (str) => {
+  return /^-?\d+(\.\d+)?$/.test(str);
+};
+
+export const transformQueryToFilterObject = (query, searchFields = DEFAULT_SEARCH_FIELDS, modelName) => {
   const { searchQuery, filter } = query;
 
   const filterObj = {};
   if (searchQuery) {
-    filterObj.search = searchFields.map((f) => ({ [f === "id" ? "id::text" : snakeCase(f)]: `%${searchQuery}%` }));
+    filterObj.search = searchFields
+      .map((f) => {
+        if (f !== "id") return { [snakeCase(f)]: `%${searchQuery}%` };
+        const code = ID_CODES()[modelName];
+        const id = searchQuery.replace(code, "");
+        if (isNumeric(id)) return { id: Number(id) };
+        return null;
+      })
+      .filter(Boolean);
   }
 
   if (filter) {

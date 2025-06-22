@@ -18,7 +18,7 @@ export const getWithRefs = async (req, res, next) => {
   if (refs !== "true") return next();
 
   try {
-    const filterObj = transformQueryToFilterObject(req.query, []);
+    const filterObj = transformQueryToFilterObject(req.query, [], classAttendanceModel.tableName);
     const fields = classAttendanceModel.getFields
       ? classAttendanceModel.getFields(req.query.fields)
       : transformFields(req.query.fields);

@@ -1,3 +1,24 @@
+import {
+  userModel,
+  courseModel,
+  employeeModel,
+  classModel,
+  enrollmentModel,
+  certificateModel,
+  shiftModel,
+  examModel,
+  studentExamModel,
+  studentConsultationModel,
+  classScheduleModel,
+  classExerciseModel,
+  classTopicModel,
+  classAttendanceModel,
+  exerciseScoreModel,
+  infoSheetModel,
+  tuitionModel,
+  tuitionDiscountModel,
+} from "../models/index.js";
+
 export const PAGER = { total: 0, pageCount: 1, page: 1, pageSize: 20 };
 export const ORDER = { order: "DESC", orderBy: "created_at" };
 export const EMPLOYEE_ROLES = ["consultant", "finance-officer", "teacher"];
@@ -47,3 +68,27 @@ export const EMPLOYEE_STATUS = {
   onHold: "Tạm nghỉ việc",
   stopped: "Đã nghỉ việc",
 };
+
+export const DEFAULT_SEARCH_FIELDS = ["id", "name"];
+export const USER_SEARCH_FIELDS = ["id", "name", "email", "phone_number"];
+
+export const ID_CODES = () => ({
+  [userModel.tableName]: "ND",
+  [courseModel.tableName]: "KH",
+  [employeeModel.tableName]: "NV",
+  [classModel.tableName]: "LH",
+  [enrollmentModel.tableName]: "DK",
+  [certificateModel.tableName]: "CC",
+  [shiftModel.tableName]: "CH",
+  [examModel.tableName]: "KT",
+  [studentExamModel.tableName]: "HKT",
+  [studentConsultationModel.tableName]: "TV",
+  [classScheduleModel.tableName]: "LH",
+  [classExerciseModel.tableName]: "BT",
+  [classTopicModel.tableName]: "CD",
+  [classAttendanceModel.tableName]: "DD",
+  [exerciseScoreModel.tableName]: "DS",
+  [infoSheetModel.tableName]: "TB",
+  [tuitionModel.tableName]: "HP",
+  [tuitionDiscountModel.tableName]: "GG",
+});

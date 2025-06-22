@@ -1,6 +1,6 @@
 import { classModel, employeeModel, userModel } from "../models/index.js";
 import { transformQueryToFilterObject } from "../utils/index.js";
-import { EMPLOYEE_ROLES } from "../constants/index.js";
+import { EMPLOYEE_ROLES, USER_SEARCH_FIELDS } from "../constants/index.js";
 import { auth } from "../middlewares/index.js";
 import { sendMail } from "./utils.js";
 import bcrypt from "bcryptjs";
@@ -187,7 +187,7 @@ const getUsersWithRole = async (req, res, next) => {
   if (!role || role === "admin" || role === "_") return next();
 
   try {
-    const filterObj = transformQueryToFilterObject(req.query, ["phone_number", "email", "name"]);
+    const filterObj = transformQueryToFilterObject(req.query, USER_SEARCH_FIELDS, userModel.tableName);
 
     filterObj.role = role;
     if (["consultant", "finance-officer"].includes(role)) {

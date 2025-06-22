@@ -1,3 +1,4 @@
+import { USER_SEARCH_FIELDS } from "../constants/index.js";
 import { auth, roles } from "../middlewares/index.js";
 import { classModel, courseModel, studentConsultationModel, userModel } from "../models/index.js";
 import { arrayToObject, transformQueryToFilterObject } from "../utils/index.js";
@@ -11,7 +12,11 @@ const getStudentWithRefs = async (req, res, next) => {
     if (refs !== "true") return next();
 
     const { refFields = ":basic" } = req.query;
-    const { consultantId, ...filterObj } = transformQueryToFilterObject(req.query, ["name", "email", "phone_number"]);
+    const { consultantId, ...filterObj } = transformQueryToFilterObject(
+      req.query,
+      USER_SEARCH_FIELDS,
+      studentConsultationModel.tableName
+    );
     if (consultantId) filterObj.consultantId = [consultantId, { isNull: true }];
 
     const [rows, pager] = await studentConsultationModel.find(filterObj, req.pager, req.order);

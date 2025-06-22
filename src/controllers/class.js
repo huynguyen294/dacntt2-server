@@ -9,6 +9,7 @@ import {
 } from "../models/index.js";
 import { checkDuplicateForTeacher, generateClassSchedules } from "../utils/schedule.js";
 import { arrayToObject, displayDate, displayDay, transformQueryToFilterObject } from "../utils/index.js";
+import { DEFAULT_SEARCH_FIELDS } from "../constants/index.js";
 
 // [GET] /classes/:id/students
 export const getClassStudents = async (req, res, next) => {
@@ -29,7 +30,7 @@ const getClassWithRefs = async (req, res, next) => {
     if (refs !== "true") return next();
 
     const { refFields = ":basic" } = req.query;
-    const filterObj = transformQueryToFilterObject(req.query);
+    const filterObj = transformQueryToFilterObject(req.query, DEFAULT_SEARCH_FIELDS, classModel.tableName);
     const [rows, pager] = await classModel.find(filterObj, req.pager, req.order);
 
     const refData = {};

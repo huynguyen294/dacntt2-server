@@ -241,7 +241,7 @@ export const generatePager = async (tableName, filter = {}, pager, valueSize) =>
   const { filterStr, values } = generateFilterString(filter);
   const finalQuery = query + filterStr;
 
-  console.log("generatePager", finalQuery);
+  console.log("generatePager", finalQuery, values);
   const result = await pgDB.query(finalQuery, values);
   const total = Number(result.rows[0].count);
   const page_count = Math.ceil(total / page_size) || 1;
@@ -260,6 +260,7 @@ export const generateSearchString = (values, filterStr, searchValue) => {
     const searchAndConditions = Object.keys(searchValue)
       .map((searchField) => {
         values.push(searchValue[searchField]);
+        if (searchField === "id") return `${searchField} = $${values.length}`;
         return `${searchField} ILIKE $${values.length}`;
       })
       .join(" AND ");
@@ -304,7 +305,7 @@ export const generateFilterString = (filter) => {
     if (field === "search" || field.includes(".search")) {
       // Add AND if not the first condition
       // Add AND if not the first condition
-      if (values.length > 0) currentFilterStr += " AND ";
+      if (values.length > 0) filterStr += " AND ";
       filterStr += generateSearchString(values, "", value);
     }
     // Handle array condition

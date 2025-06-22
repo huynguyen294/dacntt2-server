@@ -22,7 +22,7 @@ export const generateCRUD = (model, { isJunctionTable = false, searchFields = ["
     // [GET] ${model.tableName}/
     get: async (req, res, next) => {
       try {
-        const filterObj = transformQueryToFilterObject(req.query, searchFields);
+        const filterObj = transformQueryToFilterObject(req.query, searchFields, model.tableName);
         const fields = model.getFields ? model.getFields(req.query.fields) : transformFields(req.query.fields);
 
         const [rows, pager] = await model.find(filterObj, req.pager, req.order, fields);
