@@ -32,7 +32,7 @@ const findUserClasses = keyConvertWrapper(async (userIds, pager = null, order = 
   const orderStr = generateOrderStr(order, "c");
 
   const query = `
-  SELECT ${fieldsStr}, e.id as enrollment_id, e.student_id
+  SELECT ${fieldsStr}, e.id as enrollment_id, e.created_at as enrollment_at, e.student_id
   FROM enrollments e
   JOIN classes c ON e.class_id = c.id 
   WHERE e.student_id = ANY($1)
