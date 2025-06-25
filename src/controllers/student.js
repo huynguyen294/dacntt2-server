@@ -36,7 +36,7 @@ export const getOtherStudentData = async (req, res, next) => {
 
   try {
     const [
-      attendances,
+      [attendances],
       classExercises,
       [classExerciseScores],
       [courses],
@@ -45,7 +45,7 @@ export const getOtherStudentData = async (req, res, next) => {
       [tuitions],
       [tuitionDiscounts],
     ] = await Promise.all([
-      classAttendanceModel.countBy(["studentId", "classId", "attend"], { studentId: id }),
+      classAttendanceModel.find({ studentId: id }),
       classExerciseModel.getByStudents([id], null, req.order),
       exerciseScoreModel.find({ studentId: id }),
       courseModel.find({ status: COURSE_STATUSES.active }),
