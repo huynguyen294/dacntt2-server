@@ -116,7 +116,7 @@ const updateUser = async (req, res, next) => {
         if (!isPasswordCorrect) return res.status(400).json({ message: "Mật khẩu không chính xác." });
       }
 
-      data.password = await bcrypt.hash(password, 12);
+      userData.password = await bcrypt.hash(password, 12);
     }
 
     userData.last_updated_at = new Date();

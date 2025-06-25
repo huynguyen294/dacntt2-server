@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { userModel } from "../models/index.js";
+import { generateUid } from "../utils/index.js";
 
 //[GET] /auth/new-access-token
 export const generateNewAccessToken = async (req, res, next) => {
@@ -59,8 +60,51 @@ export const signIn = async (req, res, next) => {
   }
 };
 
-//[POST] /auth/google-sign-in
-export const googleSignIn = async (req, res, next) => {};
+//[POST] /auth/google-signin
+const googleSignIn = async (req, res, next) => {
+  try {
+    const { access_token } = req.body;
+    const result = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+      headers: { Authorization: `Bearer ${access_token}` },
+    });
+    const data = await result.json();
+    const { email, name, picture } = data;
+    const oldUser = await userModel.findOne({ email });
+
+    let user;
+    let jwtPayload = {};
+    if (oldUser) {
+      user = oldUser;
+      const { id, role } = oldUser;
+      jwtPayload = { email, id, userRole: role };
+    } else {
+      const newUser = await userModel.create({
+        email,
+        name,
+        role: "student",
+        imageUrl: picture,
+      });
+      user = newUser;
+      const { id } = newUser;
+      jwtPayload = { email, id, userRole: "student" };
+    }
+
+    const accessToken = jwt.sign(jwtPayload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "1h" });
+    const refreshToken = jwt.sign(jwtPayload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: "30d" });
+
+    // Gửi refresh token qua HTTP-only cookie
+    res.cookie("dacntt1_rf_t", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    });
+
+    res.status(200).json({ user, accessToken });
+  } catch (error) {
+    next(error);
+  }
+};
 
 const authController = {
   generateNewAccessToken,

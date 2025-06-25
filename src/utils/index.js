@@ -4,6 +4,28 @@ import camelCase from "lodash/camelCase.js";
 import { format } from "date-fns";
 import { DEFAULT_SEARCH_FIELDS, ID_CODES } from "../constants/index.js";
 
+const sample = (d = [], fn = Math.random) => {
+  if (d.length === 0) return;
+  return d[Math.round(fn() * (d.length - 1))];
+};
+export const generateUid = ({ limit = 8, randomFn = Math.random, numeric = true, upper = true, lower = true } = {}) => {
+  const allowed = [];
+  if (numeric) allowed.push("0123456789");
+  if (upper) allowed.push("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+  if (lower) allowed.push("abcdefghijklmnopqrstuvwxyz");
+  if (!numeric && !upper && !lower)
+    throw new Error(
+      "Sample error! At least one of the following is required: a numeric character, an uppercase letter, or a lowercase letter."
+    );
+  const allowedChars = allowed.join("");
+  const arr = [sample(allowedChars, randomFn)];
+  for (let i = 0; i < limit - 1; i++) {
+    arr.push(sample(allowedChars, randomFn));
+  }
+
+  return arr.join("");
+};
+
 export const displayDate = (value) => (value ? format(new Date(value), "dd-MM-yyyy") : "");
 export const displayDay = (value) => {
   if (!value) return "";

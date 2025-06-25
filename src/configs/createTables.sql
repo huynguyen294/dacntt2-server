@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS info_sheet (
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    password VARCHAR(255) NOT NULL,
+    password VARCHAR(255),
     email VARCHAR(100) UNIQUE NOT NULL,
     role user_role DEFAULT 'student' NOT NULL,
     date_of_birth DATE,
