@@ -1,5 +1,5 @@
 import { endOfMonth, format, startOfMonth } from "date-fns";
-import { classModel, tuitionModel, userModel } from "../models/index.js";
+import { classModel, enrollmentModel, studentConsultationModel, tuitionModel } from "../models/index.js";
 import { DATE_FORMAT } from "../constants/index.js";
 import { calcTotal, getPreviousMonth } from "../utils/index.js";
 
@@ -15,12 +15,10 @@ export const studentIndicator = async (req, res, next) => {
     const endDate2 = endOfMonth(new Date(currentYear, previous2Month));
 
     const [[previousMonthValue], [previous2MonthValue]] = await Promise.all([
-      userModel.countBy("role", {
-        role: "student",
+      enrollmentModel.countBy(null, {
         createdAt: { lte: format(endDate, DATE_FORMAT), gte: format(startDate, DATE_FORMAT) },
       }),
-      userModel.countBy("role", {
-        role: "student",
+      enrollmentModel.countBy(null, {
         createdAt: { lte: format(endDate2, DATE_FORMAT), gte: format(startDate2, DATE_FORMAT) },
       }),
     ]);
@@ -29,6 +27,56 @@ export const studentIndicator = async (req, res, next) => {
       previousMonthValue: Number(previousMonthValue.total),
       previous2MonthValue: Number(previous2MonthValue.total),
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// [GET] /reports/total-student
+export const getTotalStudent = async (req, res, next) => {
+  try {
+    const [{ total }] = await enrollmentModel.allStudents();
+    res.status(200).json({ total });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// [GET] /reports/classes
+export const getTotalStudentByClasses = async (req, res, next) => {
+  try {
+    const totals = await enrollmentModel.allStudentByClasses();
+    res.status(200).json({ totals });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// [GET] /reports/enrollment-per-months
+export const getEnrollmentsPerMonth = async (req, res, next) => {
+  try {
+    const enrollmentsPerMonth = await enrollmentModel.enrollmentsPerMonth(new Date().getFullYear());
+    res.status(200).json({ enrollmentsPerMonth });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// [GET] /reports/tuition-per-months
+export const getTuitionsPerMonth = async (req, res, next) => {
+  try {
+    const tuitionsPerMonth = await tuitionModel.tuitionsPerMonth(new Date().getFullYear());
+    res.status(200).json({ tuitionsPerMonth });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// [GET] /reports/admission-per-months
+export const getAdmissionsPerMonth = async (req, res, next) => {
+  try {
+    const admissionsPerMonth = await studentConsultationModel.admissionsPerMonth(new Date().getFullYear());
+    res.status(200).json({ admissionsPerMonth });
   } catch (error) {
     next(error);
   }

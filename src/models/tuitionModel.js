@@ -19,6 +19,7 @@ export const defaultTuition = {
 const commonServices = generateCommonServices("tuition");
 
 // other services
+const getFields = (type) => transformFields(type, { basicFields: ["id", "date", "amount", "student_id", "class_id"] });
 
 // model
 const tuitionModel = {
@@ -33,7 +34,7 @@ const tuitionModel = {
   exists: async (filter = defaultEmployee) => {
     return commonServices.exists(filter);
   },
-  getFields: transformFields,
+  getFields,
 };
 
 export default tuitionModel;
