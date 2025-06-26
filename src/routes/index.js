@@ -3,6 +3,7 @@ import userRoute from "./user.js";
 import authRoute from "./auth.js";
 import classRoute from "./class.js";
 import imageRoute from "./image.js";
+import reportRoute from "./report.js";
 import studentConsultationRoute from "./studentConsultation.js";
 import classAttendanceRoute from "./classAttendance.js";
 import classExerciseScoreRoute from "./exerciseScore.js";
@@ -32,6 +33,8 @@ const route = (app) => {
   app.use("/api-v1/users", userRoute);
   app.use("/api-v1/classes", classRoute);
   app.use("/api-v1/images", imageRoute);
+  app.use("/api-v1/reports", reportRoute);
+  app.use("/api-v1/db", dbRoute);
   app.use("/api-v1/student-consultation", studentConsultationRoute);
   app.use("/api-v1/class-exercise-scores", classExerciseScoreRoute);
   app.use("/api-v1/class-attendances", classAttendanceRoute);
@@ -52,7 +55,7 @@ const route = (app) => {
     "/api-v1/tuition-discounts",
     generateCRUDRoutes(tuitionDiscountController, { middlewares: tuitionDiscountMiddleWares })
   );
-  app.use("/api-v1/db", dbRoute);
+
   app.use((req, res, next) => {
     res.send("Không tìm thấy đường dẫn!");
   });

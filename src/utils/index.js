@@ -4,6 +4,17 @@ import camelCase from "lodash/camelCase.js";
 import { format } from "date-fns";
 import { DEFAULT_SEARCH_FIELDS, ID_CODES } from "../constants/index.js";
 
+export const calcTotal = (list = [], field = "amount") => list.reduce((acc, curr) => acc + curr[field], 0);
+
+export const getPreviousMonth = (month) => {
+  const date = new Date();
+  if (month) date.setMonth(month);
+  const currentMonth = date.getMonth();
+  let previousMonth = currentMonth - 1;
+  if (currentMonth === 0) previousMonth = 11;
+  return previousMonth;
+};
+
 const sample = (d = [], fn = Math.random) => {
   if (d.length === 0) return;
   return d[Math.round(fn() * (d.length - 1))];

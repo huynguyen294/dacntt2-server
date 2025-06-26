@@ -209,7 +209,8 @@ export const generateCommonServices = (tableName) => {
     countBy: keyConvertWrapper(async (countBy, filter = {}) => {
       if (Array.isArray(countBy)) countBy = countBy.join(", ");
       const { filterStr, values } = generateFilterString(filter);
-      const query = `SELECT ${countBy}, COUNT(*) AS total FROM ${tableName} ${filterStr} GROUP BY ${countBy}`;
+      let query = `SELECT ${countBy ? countBy + "," : ""} COUNT(*) AS total FROM ${tableName} ${filterStr} `;
+      if (countBy) query += `GROUP BY ${countBy}`;
 
       console.log("countBy:", query, values);
       const result = await pgDB.query(query, values);
@@ -286,9 +287,14 @@ export const generateFilterString = (filter) => {
 
   const generateCondition = (field, value, operator = "=") => {
     if (typeof value === "object" && value !== null) {
-      const [opKey] = Object.keys(value);
-      operator = MAP_OPERATORS[opKey];
-      value = value[opKey];
+      const keys = Object.keys(value);
+      if (keys.length === 1) {
+        const [opKey] = Object.keys(value);
+        operator = MAP_OPERATORS[opKey];
+        value = value[opKey];
+      } else {
+        return keys.map((key) => generateCondition(field, value[key], MAP_OPERATORS[key])).join(" AND ");
+      }
     }
 
     if (value === true) return `${field} ${operator}`;
@@ -298,9 +304,7 @@ export const generateFilterString = (filter) => {
     return `${field} ${operator} $${values.length}`;
   };
 
-  Object.keys(filter).forEach((field) => {
-    let value = filter[field];
-
+  Object.entries(filter).forEach(([field, value]) => {
     // handle search
     if (field === "search" || field.includes(".search")) {
       // Add AND if not the first condition
