@@ -7,7 +7,24 @@ import bcrypt from "bcryptjs";
 import groupBy from "lodash/groupBy.js";
 
 const allowedUpdateUser = ["admin"];
+const docs = [];
 
+const signUpDoc = {
+  method: "post",
+  path: "/api-v1/users/sign-up",
+  operationId: "signUp",
+  tags: ["Users"],
+  responses: {
+    201: {
+      description: "Register successfully!",
+      content: { "application/json": { schema: { type: "json", example: `{ message: 'Đăng ký thành công!' }` } } },
+    },
+    400: { description: "Registered email!" },
+    500: { description: "Something went wrong!" },
+  },
+};
+
+docs.push(signUpDoc);
 //[POST] /users/sign-up
 const signUp = async (req, res, next) => {
   try {
@@ -27,6 +44,20 @@ const signUp = async (req, res, next) => {
   }
 };
 
+const createUserDoc = {
+  method: "post",
+  path: "/api-v1/users",
+  operationId: "createUser",
+  // summary: "",
+  tags: ["Users"],
+  responses: {
+    201: { description: "Register successfully!" },
+    400: { description: "Registered email!" },
+    500: { description: "Something went wrong!" },
+  },
+};
+
+docs.push(createUserDoc);
 //[POST] /users
 const createUser = async (req, res, next) => {
   const { sendmailNewAccount } = req.query;
@@ -75,6 +106,20 @@ const createUser = async (req, res, next) => {
   }
 };
 
+const updateUserDoc = {
+  method: "patch",
+  path: "/api-v1/users",
+  operationId: "updateUser",
+  // summary: "",
+  tags: ["Users"],
+  responses: {
+    201: { description: "Update successfully!" },
+    400: { description: "Wrong credential!" },
+    500: { description: "Something went wrong!" },
+  },
+};
+
+docs.push(updateUserDoc);
 //[PATCH] /users/:id
 const updateUser = async (req, res, next) => {
   const { resetPassword } = req.query;
@@ -293,4 +338,5 @@ export default {
   resetPassword,
   update: updateUser,
   create: createUser,
+  docs,
 };

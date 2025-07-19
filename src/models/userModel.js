@@ -12,24 +12,26 @@ import {
   keyConvertWrapper,
   mergeFilterByShortName,
 } from "./utils.js";
+import { z } from "zod";
 
-export const defaultUser = {
-  id: null,
-  email: null,
-  password: null,
-  name: null,
-  gender: null,
-  role: null,
-  dateOfBirth: null,
-  phoneNumber: null,
-  address: null,
-  imageUrl: null,
-  lastUpdatedAt: null,
-  createdAt: null,
-  lastUpdatedBy: null,
-  createdBy: null,
-};
+export const userSchema = z.object({
+  id: z.number().int().default(null),
+  email: z.string().default(null),
+  password: z.string().default(null),
+  name: z.string().default(null),
+  gender: z.string().default(null),
+  role: z.string().default(null),
+  dateOfBirth: z.string().default(null),
+  phoneNumber: z.string().default(null),
+  address: z.string().default(null),
+  imageUrl: z.string().default(null),
+  lastUpdatedAt: z.string().default(null),
+  createdAt: z.string().default(null),
+  lastUpdatedBy: z.string().default(null),
+  createdBy: z.string().default(null),
+});
 
+export const defaultUser = userSchema.parse({});
 const { password, ...defaultObject } = defaultUser;
 
 // commonServices
@@ -134,6 +136,7 @@ const userModel = {
   exists: async (filter = defaultEmployee) => {
     return commonServices.exists(filter);
   },
+  schema: userSchema,
   // other services
   getFields,
   findEmployee,
